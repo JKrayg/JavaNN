@@ -1,6 +1,6 @@
 import java.util.Random;
 
-public class HeInit {
+public class HeInit extends InitWeights {
     public double initWeight(InputLayer in, OutputLayer out) {
         double inL = in.getNodes().size();
         Random rand = new Random();

@@ -1,6 +1,6 @@
 import java.util.Random;
 
-public class GlorotInit {
+public class GlorotInit extends InitWeights {
     public double initWeight(InputLayer in, OutputLayer out, String actFunc) {
         double inL = in.getNodes().size();
         double outL = out.getNodes().size();
