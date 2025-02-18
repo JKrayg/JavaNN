@@ -7,97 +7,36 @@ public class Main {
     public static void main(String[] args) {
         Data data = new Data(new ArrayList<Double>(Arrays.asList(34.0, 180.0, 74.0)));
         InputLayer in = new InputLayer(data);
-        OutputLayer out = new OutputLayer(1);
-        out.setWeights(new GlorotInit().initWeight(in, out, "relu"));
-        // Dense d1 = new Dense(4);
-        // Dense d2 = new Dense(5);
-        // Dense d3 = new Dense(3);
-
-        for (Node n: out.getNodes()) {
-            System.out.println(n.getValue());
-            System.out.println(n.getWeight());
-            System.out.println(n.getBias());
-            System.out.println(n.getActFunc());
-        }
-
-        System.out.println(in.getNodes());
-        System.out.println(out.getNodes());
-
-
-
-
-
-
-
-        // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-
-
-
-
-        // int numDenseLayers = 4;
-        // int numDenseNodes = 5;
-        // int numOutputNodes = 1;
-        // ArrayList<Node> inNodes = new ArrayList<>();
-        // ArrayList<Node> outNodes = new ArrayList<>();
-        // ArrayList<Double> data = new ArrayList<>(Arrays.asList(34.0, 180.0, 74.0));
-        // InputLayer in;
-        // ArrayList<Dense> denseLayers = new ArrayList<>();
-        // OutputLayer out;
-
-        // // init input layer
-        // for (double i: data) {
-        //     inNodes.add(new InputNode(i));
-        // }
-        // in = new InputLayer(inNodes);
-
-        // // init output layer
-        // for (int k = 0; k < numOutputNodes; k++) {
-        //     outNodes.add(new OutputNode(0, 0, new ReLU()));
-        // }
-        // out = new OutputLayer(outNodes);
-
-        // // init weights for output nodes
-        // for (Node n: out.getNodes()) {
-        //     n.setWeight(new GlorotInit().initWeight(in, out, "relu"));
-        // }
-
-        // // for (Node n: out.getNodes()) {
-        // //     System.out.println(n.getValue());
-        // //     System.out.println(n.getWeight());
-        // //     System.out.println(n.getBias());
-        // //     System.out.println(n.getActFunc());
-        // // }
-
-        // // init hidden layers
-        // for (int i = 0; i < numDenseLayers; i++) {
-        //     ArrayList<Node> dNodes = new ArrayList<>();
-        //     for (int j = 0; j < numDenseNodes; j++) {
-        //         dNodes.add(new HiddenNode(0, new GlorotInit().initWeight(in, out, "relu"), 0, new ReLU()));
-        //     }
-        //     Dense d = new Dense(dNodes);
-        //     denseLayers.add(d);
-        // }
-
-        // // for (Layer l: denseLayers) {
-        // //     System.out.println("Layer------");
-        // //     for (Node n: l.getNodes()) {
-        // //         System.out.println(n.getValue());
-        // //         System.out.println(n.getWeight());
-        // //         System.out.println(n.getBias());
-        // //         System.out.println(n.getActFunc());
-        // //         System.out.println("..............\n");
-        // //     }
-            
-        // // }
-
-        // System.out.println(in.getNodes());
-        // for (Layer l: denseLayers) {
-        //     System.out.println(l.getNodes());
-        // }
         
-        // System.out.println(out.getNodes());
+        OutputLayer out = new OutputLayer(1, "sigmoid");
+        out.setWeights(in, out, out.getActFunc());
+
+        Dense d1 = new Dense(4, "relu");
+        d1.setWeights(in, out, d1.getActFunc());
+
+        Dense d2 = new Dense(5, "relu");
+        d2.setWeights(in, out, out.getActFunc());
+
+        Dense d3 = new Dense(3, "relu");
+        d3.setWeights(in, out, out.getActFunc());
+
+        NeuralNet nn = new NeuralNet();
+        nn.addLayer(in);
+        nn.addLayer(d1);
+        // nn.addLayer(d2);
+        // nn.addLayer(d3);
+        // nn.addLayer(out);
+
+        for (Layer l: nn.getLayers()) {
+            System.out.println(l);
+            System.out.println(l.getNodes());
+            for (Node n: l.getNodes()) {
+                System.out.println(n);
+                System.out.println(n.getForwConnections());
+                System.out.println(n.getBackConnections());
+            }
+            System.out.println();
+        }
 
     }
 }
