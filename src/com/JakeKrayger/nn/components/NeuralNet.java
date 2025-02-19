@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.components;
 
 import java.util.ArrayList;
 import src.com.JakeKrayger.nn.initialize.GlorotInit;
+import src.com.JakeKrayger.nn.training.loss.Loss;
+import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
 
 public class NeuralNet {
     private ArrayList<Layer> layers;
@@ -29,6 +31,10 @@ public class NeuralNet {
 
         this.layers.add(l);
         
+    }
+
+    public void compile(Optimizer o, Loss l) {
+
     }
 
     public ArrayList<Layer> getLayers() {

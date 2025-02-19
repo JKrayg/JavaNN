@@ -22,9 +22,5 @@ public class Layer {
     public ActivationFunction getActFunc() {
         return func;
     }
-
-    public void setNodes(ArrayList<Node> nodes) {
-        this.nodes = nodes;
-    }
     
 }
