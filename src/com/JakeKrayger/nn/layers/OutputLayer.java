@@ -44,10 +44,10 @@ public class OutputLayer extends Layer {
         }
     }
 
-    public void setWeights(InputLayer in, OutputLayer out, String actFunc) {
-        for (Node n: this.getNodes()) {
-            n.setWeight(new GlorotInit().initWeight(in, out, actFunc));
-        }
-    }
+    // public void setWeights(InputLayer in, OutputLayer out, String actFunc) {
+    //     for (Node n: this.getNodes()) {
+    //         n.setWeight(new GlorotInit().initWeight(in, out, actFunc));
+    //     }
+    // }
 
 }

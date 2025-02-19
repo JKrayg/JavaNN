@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Node {
     private double value;
-    private double weight;
+    private ArrayList<Double> weights;
     private double bias;
     private ActivationFunction func;
     private ArrayList<Node> forwardConnections;
@@ -31,8 +31,8 @@ public class Node {
         return value;
     }
 
-    public double getWeight() {
-        return weight;
+    public ArrayList<Double> getWeights() {
+        return weights;
     }
 
     public double getBias() {
@@ -51,8 +51,11 @@ public class Node {
         return backwardConnections;
     }
 
-    public void setWeight(double weight) {
-        this.weight = weight;
+    public void addWeight(double weight) {
+        if (weights == null) {
+            weights = new ArrayList<>();
+        }
+        this.weights.add(weight);
     }
 
     public void setActFunc(ActivationFunction func) {
