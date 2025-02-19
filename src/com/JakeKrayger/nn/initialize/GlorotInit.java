@@ -1,11 +1,8 @@
 package src.com.JakeKrayger.nn.initialize;
+
 import java.util.Random;
-
 import src.com.JakeKrayger.nn.activation.ReLU;
-import src.com.JakeKrayger.nn.components.ActivationFunction;
-import src.com.JakeKrayger.nn.components.Layer;
-import src.com.JakeKrayger.nn.layers.*;
-
+import src.com.JakeKrayger.nn.components.*;
 
 public class GlorotInit extends InitWeights {
     public double initWeight(Layer in, Layer out, ActivationFunction actFunc) {

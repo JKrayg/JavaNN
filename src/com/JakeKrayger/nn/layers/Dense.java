@@ -1,52 +1,22 @@
 package src.com.JakeKrayger.nn.layers;
 
 import java.util.ArrayList;
-import src.com.JakeKrayger.nn.activation.*;
 import src.com.JakeKrayger.nn.components.*;
-import src.com.JakeKrayger.nn.initialize.*;
-import src.com.JakeKrayger.nn.nodes.*;
 
+// OutputLayer and Dense are pretty much the same class
 public class Dense extends Layer {
-    private ActivationFunction func;
 
-    public Dense(int numNodes, String actFunc) {
-        super(createNodes(numNodes, actFunc));
-        if (actFunc.equals("relu")) {
-            this.func = new ReLU();
-        } else if (actFunc.equals("sigmoid")) {
-            this.func = new Sigmoid();
-        } else {
-            this.func = new Softmax();
-        }
+    public Dense(int numNodes, ActivationFunction actFunc) {
+        super(createNodes(numNodes), actFunc);
     }
 
-    private static ArrayList<Node> createNodes(int numNodes, String actFunc) {
+    private static ArrayList<Node> createNodes(int numNodes) {
         ArrayList<Node> nodes = new ArrayList<>();
         for (int i = 0; i < numNodes; i++) {
-            if (actFunc.equals("relu")) {
-                nodes.add(new HiddenNode(0, 0, new ReLU()));
-            } else {
-                nodes.add(new HiddenNode(0, 0, new Sigmoid()));
-            }
+            nodes.add(new Node(0, 0));
             
         }
 
         return nodes;
     }
-
-    public String getActFunc() {
-        if (this.func instanceof ReLU) {
-            return "relu";
-        } else if (this.func instanceof Sigmoid) {
-            return "sigmoid";
-        } else {
-            return "softmax";
-        }
-    }
-
-    // public void setWeights(InputLayer in, OutputLayer out, String actFunc) {
-    //     for (Node n: this.getNodes()) {
-    //         n.setWeight(new GlorotInit().initWeight(in, out, actFunc));
-    //     }
-    // }
 }

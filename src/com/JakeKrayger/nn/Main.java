@@ -1,22 +1,22 @@
 package src.com.JakeKrayger.nn;
 
 // Jake Krayger
-
 import java.util.ArrayList;
 import java.util.Arrays;
-
+import src.com.JakeKrayger.nn.activation.*;
 import src.com.JakeKrayger.nn.components.*;
 import src.com.JakeKrayger.nn.layers.*;
+import src.com.JakeKrayger.nn.nodes.InputNode;
 
 public class Main {
     public static void main(String[] args) {
         Data data = new Data(new ArrayList<Double>(Arrays.asList(34.0, 180.0, 74.0)));
 
         InputLayer in = new InputLayer(data);
-        Dense d1 = new Dense(4, "relu");
+        Dense d1 = new Dense(4, new ReLU());
         // Dense d2 = new Dense(5, "relu");
         // Dense d3 = new Dense(3, "relu");
-        OutputLayer out = new OutputLayer(1, "sigmoid");
+        OutputLayer out = new OutputLayer(1, new Sigmoid());
 
         NeuralNet nn = new NeuralNet();
         nn.addLayer(in);
@@ -25,14 +25,27 @@ public class Main {
         // nn.addLayer(d3);
         nn.addLayer(out);
 
+        
+
         for (Layer l: nn.getLayers()) {
-            System.out.println(l);
-            System.out.println(l.getNodes());
+            System.out.println(l.getClass().getSimpleName() + " - Layer");
+            if (!(l instanceof InputLayer)) {
+                System.out.println(l.getActFunc().getClass().getSimpleName() + " - Activation function");
+            }
+            System.out.println("oooooooooooooooooo");
             for (Node n: l.getNodes()) {
-                System.out.println(n);
-                System.out.println(n.getForwConnections());
-                System.out.println(n.getWeights());
-                System.out.println(n.getBackConnections());
+                if (!(n instanceof InputNode)) {
+                    System.out.println(n.getClass().getSimpleName() + " - Node");
+                    System.out.println("value: " + n.getValue());
+                    System.out.println("weights: " + n.getWeights());
+                    System.out.println("bias: " + n.getBias());
+                    System.out.println("forward conns: " + n.getForwConnections());
+                    System.out.println("backward conns: " + n.getBackConnections());
+                } else {
+                    System.out.println(n.getClass().getSimpleName() + " - Node");
+                    System.out.println("value: " + n.getValue());
+                    System.out.println("forward conns: " + n.getForwConnections());
+                }
             }
             System.out.println();
         }
