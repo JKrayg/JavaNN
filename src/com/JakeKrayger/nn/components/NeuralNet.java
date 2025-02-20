@@ -34,7 +34,7 @@ public class NeuralNet {
     }
 
     public void compile(Optimizer o, Loss l) {
-
+        
     }
 
     public ArrayList<Layer> getLayers() {
