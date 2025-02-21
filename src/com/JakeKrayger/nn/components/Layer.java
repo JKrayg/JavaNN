@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.components;
 
 import java.util.ArrayList;
 
+import src.com.JakeKrayger.nn.activation.ActivationFunction;
+
 public class Layer {
     private ArrayList<Node> nodes;
     private ActivationFunction func;

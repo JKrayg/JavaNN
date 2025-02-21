@@ -1,6 +1,8 @@
 package src.com.JakeKrayger.nn.initialize;
 
 import java.util.Random;
+
+import src.com.JakeKrayger.nn.activation.ActivationFunction;
 import src.com.JakeKrayger.nn.activation.ReLU;
 import src.com.JakeKrayger.nn.components.*;
 

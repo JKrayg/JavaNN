@@ -1,8 +1,12 @@
 package src.com.JakeKrayger.nn;
 
+
 // Jake Krayger
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Scanner;
+import java.io.File;
+import java.io.FileNotFoundException;
 import src.com.JakeKrayger.nn.activation.*;
 import src.com.JakeKrayger.nn.components.*;
 import src.com.JakeKrayger.nn.layers.*;
@@ -13,8 +17,38 @@ import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class Main {
     public static void main(String[] args) {
-        // example for binary classification
+        // String filePath = "src\\resources\\datasets\\wdbc.data";
+        // ArrayList<double[]> data = new ArrayList<>();
+        // ArrayList<String> labels = new ArrayList<>();
+
+        // try {
+        //     File f = new File(filePath);
+        //     Scanner scan = new Scanner(f);
+        //     while (scan.hasNextLine()) {
+        //         String line = scan.nextLine();
+        //         labels.add(line.split(",", 3)[1]);
+        //         double[] toDub;
+        //         String d = line.split(",", 3)[2];
+        //         String[] splt = d.split(",");
+        //         toDub = new double[splt.length];
+        //         for (int i = 0; i < splt.length; i++) {
+        //             toDub[i] = Double.parseDouble(splt[i]);
+        //         }
+        //         data.add(toDub);
+
+
+        //     }
+        //     for (double d: data.get(0)) {
+        //         System.out.println(d);
+        //     }
+        //     System.out.println(Arrays.asList(labels));
+        //     scan.close();
+        // } catch (FileNotFoundException e) {
+        //     e.printStackTrace();
+        // }
+
         Data data = new Data(new ArrayList<Double>(Arrays.asList(34.0, 180.0, 74.0)));
+
         InputLayer in = new InputLayer(data);
         Dense d1 = new Dense(3, new ReLU());
         // Dense d2 = new Dense(5, "relu");
@@ -26,9 +60,17 @@ public class Main {
         nn.addLayer(d1);
         // nn.addLayer(d2);
         // nn.addLayer(d3);
-        // nn.addLayer(out);
+        nn.addLayer(out);
 
-        nn.compile(new Adam(), new CatCrossEntropy());
+        // nn.compile(new Adam(), new CatCrossEntropy());
+
+
+
+
+
+
+
+
 
 
         for (Layer l: nn.getLayers()) {
@@ -54,10 +96,19 @@ public class Main {
             System.out.println();
         }
 
-        MathUtils ws = new MathUtils();
-        for (Node n: d1.getNodes()) {
-            System.out.println(ws.weightedSum(in, n));
+        
+
+        Softmax sm = new Softmax();
+
+        System.out.println("Probabilties");
+        for(double d: sm.execute(d1, out)) {
+            System.out.println(d);
         }
+
+        // MathUtils ws = new MathUtils();
+        // for (Node n: d1.getNodes()) {
+        //     System.out.println(ws.weightedSum(in, n));
+        // }
 
     }
 }

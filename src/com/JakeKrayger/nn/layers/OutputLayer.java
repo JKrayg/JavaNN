@@ -1,6 +1,8 @@
 package src.com.JakeKrayger.nn.layers;
 
 import java.util.ArrayList;
+
+import src.com.JakeKrayger.nn.activation.ActivationFunction;
 import src.com.JakeKrayger.nn.components.*;
 
 // OutputLayer and Dense are pretty much the same class
