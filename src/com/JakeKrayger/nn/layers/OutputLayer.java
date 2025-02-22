@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.layers;
 
 import java.util.ArrayList;
 
+import org.ejml.simple.SimpleMatrix;
+
 import src.com.JakeKrayger.nn.activation.ActivationFunction;
 import src.com.JakeKrayger.nn.components.*;
 
@@ -15,7 +17,7 @@ public class OutputLayer extends Layer {
     private static ArrayList<Node> createNodes(int numNodes) {
         ArrayList<Node> nodes = new ArrayList<>();
         for (int i = 0; i < numNodes; i++) {
-            nodes.add(new Node(0, 0));
+            nodes.add(new Node(0));
             
         }
 

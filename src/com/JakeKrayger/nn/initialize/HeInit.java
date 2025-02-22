@@ -1,14 +1,21 @@
 package src.com.JakeKrayger.nn.initialize;
 
 import java.util.Random;
+
+import src.com.JakeKrayger.nn.components.Layer;
 import src.com.JakeKrayger.nn.layers.*;
 
 public class HeInit extends InitWeights {
-    public double initWeight(InputLayer in, OutputLayer out) {
-        double inL = in.getNodes().size();
-        Random rand = new Random();
-        double std = Math.sqrt(2 / inL);
+    public double[] initWeight(Layer in) {
+        int inL = in.getNodes().size();
+        double std = Math.sqrt(2.0 / inL);
+        double[] weights = new double[inL];
 
-        return rand.nextGaussian() * std;
+        for (int i = 0; i < in.getNodes().size(); i++) {
+            Random rand = new Random();
+            weights[i] = rand.nextGaussian() * std;
+        }
+
+        return weights;
     }
 }

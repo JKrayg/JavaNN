@@ -1,28 +1,31 @@
 package src.com.JakeKrayger.nn.components;
 
 import java.util.ArrayList;
+import org.ejml.simple.SimpleMatrix;
 
 public class Node {
-    private double value;
-    private ArrayList<Double> weights;
+    private SimpleMatrix values;
+    private SimpleMatrix weights;
     private double bias;
     private ArrayList<Node> forwardConnections;
     private ArrayList<Node> backwardConnections;
 
-    public Node(double value, double bias) {
-        this.value = value;
+    public Node() {}
+
+    public Node(double bias) {
+        // this.values = values;
         this.bias = bias;
     }
 
-    public Node(double value) {
-        this.value = value;
+    // public Node(SimpleMatrix values) {
+    //     this.values = values;
+    // }
+
+    public SimpleMatrix getValues() {
+        return values;
     }
 
-    public double getValue() {
-        return value;
-    }
-
-    public ArrayList<Double> getWeights() {
+    public SimpleMatrix getWeights() {
         return weights;
     }
 
@@ -38,11 +41,12 @@ public class Node {
         return backwardConnections;
     }
 
-    public void addWeight(double weight) {
-        if (weights == null) {
-            weights = new ArrayList<>();
-        }
-        this.weights.add(weight);
+    public void setValues(double[] weights) {
+        this.weights = new SimpleMatrix(weights);
+    }
+
+    public void setWeights(double[] weights) {
+        this.weights = new SimpleMatrix(weights);
     }
 
     public void setForwConnection(Node node) {

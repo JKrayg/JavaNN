@@ -13,8 +13,8 @@ public class InputLayer extends Layer {
 
     private static ArrayList<Node> createNodes(Data data) {
         ArrayList<Node> nodes = new ArrayList<>();
-        for (Double d: data.getData()) {
-            nodes.add(new InputNode(d));
+        for (int i = 0; i < data.getData().getNumCols(); i++) {
+            nodes.add(new Node());
         }
 
         return nodes;

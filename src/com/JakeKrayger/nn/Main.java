@@ -5,6 +5,9 @@ package src.com.JakeKrayger.nn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+
+import org.ejml.simple.SimpleMatrix;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import src.com.JakeKrayger.nn.activation.*;
@@ -47,68 +50,62 @@ public class Main {
         //     e.printStackTrace();
         // }
 
-        Data data = new Data(new ArrayList<Double>(Arrays.asList(34.0, 180.0, 74.0)));
-
-        InputLayer in = new InputLayer(data);
-        Dense d1 = new Dense(3, new ReLU());
-        // Dense d2 = new Dense(5, "relu");
-        // Dense d3 = new Dense(3, "relu");
-        OutputLayer out = new OutputLayer(data.getData().size(), new Sigmoid());
-
-        NeuralNet nn = new NeuralNet();
-        nn.addLayer(in);
-        nn.addLayer(d1);
-        // nn.addLayer(d2);
-        // nn.addLayer(d3);
-        nn.addLayer(out);
-
         // nn.compile(new Adam(), new CatCrossEntropy());
 
+        double[] sample1 = new double[]{1, 2, 3, 4};
+        double[] sample2 = new double[]{5, 6, 7, 8};
+        double[] sample3 = new double[]{9, 10, 11, 12};
+        double[] sample4 = new double[]{13, 14, 15, 16};
+        double[][] allData = new double[][]{sample1, sample2, sample3, sample4};
+        double[][] batch1 = new double[][]{sample1, sample2};
+        double[][] batch2 = new double[][]{sample3, sample4};
 
+        Data data = new Data(allData);
+        NeuralNet nn = new NeuralNet();
 
+        InputLayer in = new InputLayer(data);
+        Dense d1 = new Dense(5, new ReLU());
 
-
-
-
+        nn.addLayer(in);
+        nn.addLayer(d1);
 
 
 
         for (Layer l: nn.getLayers()) {
-            System.out.println(l.getClass().getSimpleName() + " - Layer");
-            // if (!(l instanceof InputLayer)) {
-            //     System.out.println(l.getActFunc().getClass().getSimpleName() + " - Activation function");
-            // }
+            System.out.println("\n" + l.getClass().getSimpleName() + " - Layer");
             System.out.println("oooooooooooooooooo");
             for (Node n: l.getNodes()) {
-                if (!(n instanceof InputNode)) {
-                    System.out.println(n.getClass().getSimpleName() + " - Node");
-                    System.out.println("value: " + n.getValue());
+                if (!(l instanceof InputLayer)) {
+                    System.out.println("\n" + n + " - Node");
+                    System.out.println("values: " + n.getValues());
                     System.out.println("weights: " + n.getWeights());
                     System.out.println("bias: " + n.getBias());
-                    // System.out.println("forward conns: " + n.getForwConnections());
-                    // System.out.println("backward conns: " + n.getBackConnections());
+                    System.out.println("forward conns: ");
+                    if (n.getForwConnections() != null) {
+                        for (Node fCon : n.getForwConnections()) {
+                            System.out.println(fCon);
+                        }
+                    }
+                    
+                    System.out.println();
+                    System.out.println("backward conns: ");
+                    for (Node bCon : n.getBackConnections()) {
+                        System.out.println(bCon);
+                    }
+                    System.out.println();
                 } else {
-                    System.out.println(n.getClass().getSimpleName() + " - Node");
-                    System.out.println("value: " + n.getValue());
-                    // System.out.println("forward conns: " + n.getForwConnections());
+                    System.out.println("\n" + n + " - Node");
+                    System.out.println("values: " + n.getValues());
+                    System.out.println("forward conns: ");
+                    if (n.getForwConnections() != null) {
+                        for (Node fCon : n.getForwConnections()) {
+                            System.out.println(fCon);
+                        }
+                    }
                 }
             }
             System.out.println();
         }
-
-        
-
-        Softmax sm = new Softmax();
-
-        System.out.println("Probabilties");
-        for(double d: sm.execute(d1, out)) {
-            System.out.println(d);
-        }
-
-        // MathUtils ws = new MathUtils();
-        // for (Node n: d1.getNodes()) {
-        //     System.out.println(ws.weightedSum(in, n));
-        // }
 
     }
 }

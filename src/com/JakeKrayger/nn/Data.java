@@ -1,24 +1,21 @@
 package src.com.JakeKrayger.nn;
 
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.io.File;
-import java.io.FileNotFoundException;
+import org.ejml.simple.SimpleMatrix;
 
 public class Data {
-    private ArrayList<Double> data;
+    private SimpleMatrix data;
 
     public Data() {}
 
-    public Data(ArrayList<Double> data) {
-        this.data = data;
+    public Data(double[][] data) {
+        this.data = new SimpleMatrix(data);
     }
 
     public Data(String filename) {
         
     }
 
-    public ArrayList<Double> getData() {
+    public SimpleMatrix getData() {
         return data;
     }
 }

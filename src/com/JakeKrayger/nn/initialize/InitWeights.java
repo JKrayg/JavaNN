@@ -1,6 +1,6 @@
 package src.com.JakeKrayger.nn.initialize;
 
-// do not need this
+// do I need this
 public class InitWeights {
     
 }

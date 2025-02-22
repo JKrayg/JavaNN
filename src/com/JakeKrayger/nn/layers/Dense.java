@@ -15,7 +15,7 @@ public class Dense extends Layer {
     private static ArrayList<Node> createNodes(int numNodes) {
         ArrayList<Node> nodes = new ArrayList<>();
         for (int i = 0; i < numNodes; i++) {
-            nodes.add(new Node(0, 0));
+            nodes.add(new Node(0));
             
         }
 
