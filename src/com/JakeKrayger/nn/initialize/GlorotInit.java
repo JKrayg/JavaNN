@@ -21,4 +21,18 @@ public class GlorotInit extends InitWeights {
         return weights;
 
     }
+
+    public double[] initWeight(int inputSize, Layer out) {
+        int inL = inputSize;
+        int outL = out.getNodes().size();
+        double varW = 1 / (inL + outL);
+        double[] weights = new double[inL];
+        for (int i = 0; i < inL; i++) {
+            Random rand = new Random();
+            weights[i] = rand.nextGaussian() * Math.sqrt(varW);
+        }
+
+        return weights;
+
+    }
 }

@@ -18,4 +18,17 @@ public class HeInit extends InitWeights {
 
         return weights;
     }
+
+    public double[] initWeight(int inputSize) {
+        int inL = inputSize;
+        double std = Math.sqrt(2.0 / inL);
+        double[] weights = new double[inL];
+
+        for (int i = 0; i < inL; i++) {
+            Random rand = new Random();
+            weights[i] = rand.nextGaussian() * std;
+        }
+
+        return weights;
+    }
 }

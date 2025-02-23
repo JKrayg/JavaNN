@@ -12,6 +12,10 @@ public class Dense extends Layer {
         super(createNodes(numNodes), actFunc);
     }
 
+    public Dense(int numNodes, ActivationFunction actFunc, int inputSize) {
+        super(createNodes(numNodes), actFunc, inputSize);
+    }
+
     private static ArrayList<Node> createNodes(int numNodes) {
         ArrayList<Node> nodes = new ArrayList<>();
         for (int i = 0; i < numNodes; i++) {

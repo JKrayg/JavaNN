@@ -41,8 +41,8 @@ public class Node {
         return backwardConnections;
     }
 
-    public void setValues(double[] weights) {
-        this.weights = new SimpleMatrix(weights);
+    public void setValues(SimpleMatrix values) {
+        this.values = values;
     }
 
     public void setWeights(double[] weights) {

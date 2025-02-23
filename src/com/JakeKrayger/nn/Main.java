@@ -55,57 +55,94 @@ public class Main {
         double[] sample1 = new double[]{1, 2, 3, 4};
         double[] sample2 = new double[]{5, 6, 7, 8};
         double[] sample3 = new double[]{9, 10, 11, 12};
-        double[] sample4 = new double[]{13, 14, 15, 16};
-        double[][] allData = new double[][]{sample1, sample2, sample3, sample4};
+        double[] sample4 = new double[]{0.1, 0.2, 0.3, 0.4};
+        double[] weights = new double[]{0.1, 0.2, 0.3, 0.4};
+        double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4};
         double[][] batch1 = new double[][]{sample1, sample2};
         double[][] batch2 = new double[][]{sample3, sample4};
 
-        Data data = new Data(allData);
+
+        Data data = new Data(sampleData);
+        // System.out.println(data.getData());
         NeuralNet nn = new NeuralNet();
 
-        InputLayer in = new InputLayer(data);
-        Dense d1 = new Dense(5, new ReLU());
+        // InputLayer in = new InputLayer(data);
+        Dense d1 = new Dense(5, new ReLU(), sampleData[0].length);
+        Dense d2 = new Dense(3, new ReLU());
 
-        nn.addLayer(in);
+        // nn.addLayer(in);
         nn.addLayer(d1);
+        nn.addLayer(d2);
+
+        nn.singleForwardPass(data, 2);
+
+        // nn.compile(new Adam(), new BinCrossEntropy());
 
 
 
-        for (Layer l: nn.getLayers()) {
-            System.out.println("\n" + l.getClass().getSimpleName() + " - Layer");
-            System.out.println("oooooooooooooooooo");
-            for (Node n: l.getNodes()) {
-                if (!(l instanceof InputLayer)) {
-                    System.out.println("\n" + n + " - Node");
-                    System.out.println("values: " + n.getValues());
-                    System.out.println("weights: " + n.getWeights());
-                    System.out.println("bias: " + n.getBias());
-                    System.out.println("forward conns: ");
-                    if (n.getForwConnections() != null) {
-                        for (Node fCon : n.getForwConnections()) {
-                            System.out.println(fCon);
-                        }
-                    }
+
+
+        
+
+        // Node n1 = new Node(0.0);
+        // Node n2 = new Node(0.0);
+        // Node n3 = new Node(0.0);
+        // n1.setValues(new SimpleMatrix(sample1));
+        // n2.setValues(new SimpleMatrix(sample2));
+        // n3.setValues(new SimpleMatrix(sample3));
+        // ArrayList<Node> nodes = new ArrayList<>();
+        // nodes.add(n1);
+        // nodes.add(n2);
+        // nodes.add(n3);
+        // Layer l = new Layer(nodes);
+
+        // Node nW = new Node(0.0);
+        // nW.setWeights(weights);
+
+        // MathUtils maths = new MathUtils();
+
+        // System.out.println(maths.weightedSum(l, nW));
+
+
+
+
+        // for (Layer l: nn.getLayers()) {
+        //     System.out.println("\noooooooooooooooooo " + l.getClass().getSimpleName() + " - Layer");
+        //     System.out.println("activation function: " + l.getActFunc().getClass().getSimpleName());
+        //     for (Node n: l.getNodes()) {
+        //         if (l.getInputSize() == 0) {
+        //             System.out.println("\n" + n + " - Node");
+        //             System.out.println("values: " + n.getValues());
+        //             System.out.println("weights: " + n.getWeights());
+        //             System.out.println("bias: " + n.getBias());
+        //             System.out.println("forward conns: ");
+        //             if (n.getForwConnections() != null) {
+        //                 for (Node fCon : n.getForwConnections()) {
+        //                     System.out.println(fCon);
+        //                 }
+        //             }
                     
-                    System.out.println();
-                    System.out.println("backward conns: ");
-                    for (Node bCon : n.getBackConnections()) {
-                        System.out.println(bCon);
-                    }
-                    System.out.println();
-                } else {
-                    System.out.println("\n" + n + " - Node");
-                    System.out.println("values: " + n.getValues());
-                    System.out.println("forward conns: ");
-                    if (n.getForwConnections() != null) {
-                        for (Node fCon : n.getForwConnections()) {
-                            System.out.println(fCon);
-                        }
-                    }
-                }
-            }
-            System.out.println();
-        }
+        //             System.out.println();
+        //             System.out.println("backward conns: ");
+        //             for (Node bCon : n.getBackConnections()) {
+        //                 System.out.println(bCon);
+        //             }
+        //             System.out.println();
+        //         } else {
+        //             System.out.println("\n" + n + " - Node");
+        //             System.out.println("values: " + n.getValues());
+        //             System.out.println("weights: " + n.getWeights());
+        //             System.out.println("bias: " + n.getBias());
+        //             System.out.println("forward conns: ");
+        //             if (n.getForwConnections() != null) {
+        //                 for (Node fCon : n.getForwConnections()) {
+        //                     System.out.println(fCon);
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     System.out.println();
+        // }
 
     }
 }

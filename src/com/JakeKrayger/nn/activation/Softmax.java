@@ -14,10 +14,10 @@ public class Softmax extends ActivationFunction {
         ArrayList<Double> probabilities = new ArrayList<>();
 
         // get weighted sums for each output node and exp weighted sum 
-        for (Node n: output.getNodes()) {
-            outWeightedSums.add(ws.weightedSum(prev, n));
-            expWeightedSum = expWeightedSum + Math.exp(ws.weightedSum(prev, n));
-        }
+        // for (Node n: output.getNodes()) {
+        //     outWeightedSums.add(ws.weightedSum(prev, n));
+        //     expWeightedSum = expWeightedSum + Math.exp(ws.weightedSum(prev, n));
+        // }
         
         // get probabilities
         for (double d: outWeightedSums) {
