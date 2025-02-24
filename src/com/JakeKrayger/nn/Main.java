@@ -82,9 +82,9 @@ public class Main {
         nn.singleForwardPass(data, 2);
 
         SimpleMatrix test = new SimpleMatrix(new double[][]{{1}, {2}, {3}});
-        Softmax sm = new Softmax();
+        Tanh tanH = new Tanh();
 
-        System.out.println(sm.execute(test));
+        System.out.println(tanH.execute(test));
 
         // nn.compile(new Adam(), new BinCrossEntropy());
 
