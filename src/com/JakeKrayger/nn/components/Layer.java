@@ -2,9 +2,13 @@ package src.com.JakeKrayger.nn.components;
 
 import java.util.ArrayList;
 
+import org.ejml.simple.SimpleMatrix;
 import src.com.JakeKrayger.nn.activation.ActivationFunction;
 
 public class Layer {
+    private SimpleMatrix activationsM;
+    private SimpleMatrix weightsM;
+    private SimpleMatrix biasV;
     private ArrayList<Node> nodes;
     private ActivationFunction func;
     private int inputSize;
