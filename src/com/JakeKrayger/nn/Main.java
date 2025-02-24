@@ -4,7 +4,10 @@ package src.com.JakeKrayger.nn;
 // Jake Krayger
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -55,11 +58,11 @@ public class Main {
         double[] sample1 = new double[]{1, 2, 3, 4};
         double[] sample2 = new double[]{5, 6, 7, 8};
         double[] sample3 = new double[]{9, 10, 11, 12};
-        double[] sample4 = new double[]{0.1, 0.2, 0.3, 0.4};
+        double[] sample4 = new double[]{13, 14, 15, 16};
         double[] weights = new double[]{0.1, 0.2, 0.3, 0.4};
         double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4};
-        double[][] batch1 = new double[][]{sample1, sample2};
-        double[][] batch2 = new double[][]{sample3, sample4};
+        String[] labels = {"R", "B", "B", "G"};
+        Set<String> classes = new HashSet<>(List.of(labels));
 
 
         Data data = new Data(sampleData);
@@ -69,12 +72,19 @@ public class Main {
         // InputLayer in = new InputLayer(data);
         Dense d1 = new Dense(5, new ReLU(), sampleData[0].length);
         Dense d2 = new Dense(3, new ReLU());
+        Dense d3 = new Dense(classes.size(), new Softmax());
 
         // nn.addLayer(in);
         nn.addLayer(d1);
         nn.addLayer(d2);
+        nn.addLayer(d3);
 
         nn.singleForwardPass(data, 2);
+
+        SimpleMatrix test = new SimpleMatrix(new double[][]{{1}, {2}, {3}});
+        Softmax sm = new Softmax();
+
+        System.out.println(sm.execute(test));
 
         // nn.compile(new Adam(), new BinCrossEntropy());
 
@@ -82,7 +92,7 @@ public class Main {
 
 
 
-        
+
 
         // Node n1 = new Node(0.0);
         // Node n2 = new Node(0.0);

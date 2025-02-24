@@ -28,7 +28,7 @@ public class NeuralNet {
                     pNode.setForwConnection(nNode);
                     if (l.getActFunc() instanceof ReLU) {
                         nNode.setWeights(new HeInit().initWeight(this.layers.get(this.layers.size() - 1)));
-                    } else if (l.getActFunc() instanceof Sigmoid || l.getActFunc() instanceof Tanh) {
+                    } else {
                         nNode.setWeights(new GlorotInit().initWeight(this.layers.get(this.layers.size() - 1), l));
                     }
                 }
@@ -45,7 +45,7 @@ public class NeuralNet {
             for (Node nNode : l.getNodes()) {
                 if (l.getActFunc() instanceof ReLU) {
                     nNode.setWeights(new HeInit().initWeight(l.getInputSize()));
-                } else if (l.getActFunc() instanceof Sigmoid || l.getActFunc() instanceof Tanh) {
+                } else {
                     nNode.setWeights(new GlorotInit().initWeight(l.getInputSize(), l));
                 }
             }
@@ -58,10 +58,13 @@ public class NeuralNet {
     public void singleForwardPass(Data d, int batchSize) {
         SimpleMatrix dater = d.getData().transpose();
         SimpleMatrix firstBatch = new SimpleMatrix(dater.getRow(0));
+        SimpleMatrix values = new SimpleMatrix(dater.getNumRows(), 0);
 
         for (int i = 1; i < batchSize; i++) {
             firstBatch = firstBatch.concatRows(new SimpleMatrix(dater.getRow(i)));
         }
+
+        System.out.println(firstBatch);
 
         // for (Node n: layers.getFirst().getNodes()) {
         // ActivationFunction af = layers.getFirst().getActFunc();

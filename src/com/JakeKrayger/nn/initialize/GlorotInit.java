@@ -11,7 +11,7 @@ public class GlorotInit extends InitWeights {
     public double[] initWeight(Layer in, Layer out) {
         int inL = in.getNodes().size();
         int outL = out.getNodes().size();
-        double varW = 1 / (inL + outL);
+        double varW = 1.0 / (inL + outL);
         double[] weights = new double[inL];
         for (int i = 0; i < in.getNodes().size(); i++) {
             Random rand = new Random();
@@ -25,7 +25,7 @@ public class GlorotInit extends InitWeights {
     public double[] initWeight(int inputSize, Layer out) {
         int inL = inputSize;
         int outL = out.getNodes().size();
-        double varW = 1 / (inL + outL);
+        double varW = 1.0 / (inL + outL);
         double[] weights = new double[inL];
         for (int i = 0; i < inL; i++) {
             Random rand = new Random();

@@ -1,6 +1,5 @@
 package src.com.JakeKrayger.nn.utils;
 
-import java.util.ArrayList;
 
 import org.ejml.simple.SimpleMatrix;
 import src.com.JakeKrayger.nn.components.Layer;
