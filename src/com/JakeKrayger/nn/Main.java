@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.AbstractMap.SimpleEntry;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -70,21 +71,37 @@ public class Main {
         NeuralNet nn = new NeuralNet();
 
         // InputLayer in = new InputLayer(data);
-        Dense d1 = new Dense(5, new ReLU(), sampleData[0].length);
+        Dense d1 = new Dense(3, new Sigmoid(), 4);
         Dense d2 = new Dense(3, new ReLU());
-        Dense d3 = new Dense(classes.size(), new Softmax());
-
-        // nn.addLayer(in);
         nn.addLayer(d1);
         nn.addLayer(d2);
-        nn.addLayer(d3);
 
-        nn.singleForwardPass(data, 2);
 
-        SimpleMatrix test = new SimpleMatrix(new double[][]{{1}, {2}, {3}});
-        Tanh tanH = new Tanh();
+        // for (Layer l: nn.getLayers()) {
+        //     System.out.println(l);
+        //     System.out.println(l.getWeights());
+        //     System.out.println(l.getbias());
+        //     System.out.println();
+        // }
 
-        System.out.println(tanH.execute(test));
+        // System.out.println(d1.getWeights());
+
+        MathUtils maths = new MathUtils();
+        System.out.println(maths.weightedSum(sampleData, d1));
+
+
+        // Dense d3 = new Dense(classes.size(), new Softmax());
+
+        
+        // nn.addLayer(d2);
+        // nn.addLayer(d3);
+
+        // nn.singleForwardPass(data, 2);
+
+        // SimpleMatrix test = new SimpleMatrix(new double[][]{{1}, {2}, {3}});
+        // Tanh tanH = new Tanh();
+
+        // System.out.println(tanH.execute(test));
 
         // nn.compile(new Adam(), new BinCrossEntropy());
 

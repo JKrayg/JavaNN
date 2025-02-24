@@ -22,32 +22,18 @@ public class NeuralNet {
 
     public void addLayer(Layer l) {
         if (this.layers != null) {
-            // set forward connections and weights
-            for (Node pNode : this.layers.get(this.layers.size() - 1).getNodes()) {
-                for (Node nNode : l.getNodes()) {
-                    pNode.setForwConnection(nNode);
-                    if (l.getActFunc() instanceof ReLU) {
-                        nNode.setWeights(new HeInit().initWeight(this.layers.get(this.layers.size() - 1)));
-                    } else {
-                        nNode.setWeights(new GlorotInit().initWeight(this.layers.get(this.layers.size() - 1), l));
-                    }
-                }
-            }
-
-            // set backward connections
-            for (Node nNode : l.getNodes()) {
-                for (Node pNode : this.layers.get(this.layers.size() - 1).getNodes()) {
-                    nNode.setBackConnection(pNode);
-                }
+            Layer prevLayer = this.layers.get(this.layers.size() - 1);
+            if (l.getActFunc() instanceof ReLU) {
+                l.setWeights(new HeInit().initWeight(prevLayer, l));
+            } else {
+                l.setWeights(new GlorotInit().initWeight(prevLayer, l));
             }
         } else {
             layers = new ArrayList<>();
-            for (Node nNode : l.getNodes()) {
-                if (l.getActFunc() instanceof ReLU) {
-                    nNode.setWeights(new HeInit().initWeight(l.getInputSize()));
-                } else {
-                    nNode.setWeights(new GlorotInit().initWeight(l.getInputSize(), l));
-                }
+            if (l.getActFunc() instanceof ReLU) {
+                l.setWeights(new SimpleMatrix(new HeInit().initWeight(l.getInputSize(), l)));
+            } else {
+                l.setWeights(new SimpleMatrix(new GlorotInit().initWeight(l.getInputSize(), l)));
             }
         }
 
@@ -82,16 +68,14 @@ public class NeuralNet {
 
     // FORWARD PASS:
     // -> input new values
-    // -> update values of nodes in hidden layer with activation function (repeat
-    // for all hidden layers)
+    // -> update values of nodes in hidden layer with activation function (repeat for all hidden layers)
     // -> update values of nodes in output layer using the activation function
 
     // BACK PROPAGATION
     // -> compute output layer error
     // -> use loss function to get difference between predicted and actual values
     // -> compute error for hidden layers
-    // -> pass error backward using weight connections and activation function
-    // derivative
+    // -> pass error backward using weight connections and activation function derivative
     // -> compute weight and bias updates
     // -> use error and learning rate to adjust weights and biases
     // -> update weights and biases

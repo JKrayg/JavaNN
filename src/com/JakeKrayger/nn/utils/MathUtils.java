@@ -7,14 +7,15 @@ import src.com.JakeKrayger.nn.components.Node;
 
 public class MathUtils {
     // weighted sum for single node ∑(wi⋅xi)+b
-    public SimpleMatrix weightedSum(Layer prevLayer, Node currNode) {
-        double[] sums = new double[prevLayer.getNodes().size()];
+    public SimpleMatrix weightedSum(Layer prevLayer, Layer currLayer) {
+        return prevLayer.getActivations().mult(currLayer.getWeights()).plus(currLayer.getBias());
+    }
 
-        for (int i = 0; i < prevLayer.getNodes().size(); i++) {
-            sums[i] = currNode.getWeights().dot(prevLayer.getNodes().get(i).getValues()) + 0.1 ;
-        }
-
-        return new SimpleMatrix(sums);
+    public SimpleMatrix weightedSum(double[][] inputData, Layer currLayer) {
+        SimpleMatrix data = new SimpleMatrix(inputData);
+        System.out.println(data);
+        System.out.println(currLayer.getWeights());
+        return new SimpleMatrix(data.mult(currLayer.getWeights()));
     }
 
     public double mean(double[] dubs) {
