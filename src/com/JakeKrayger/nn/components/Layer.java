@@ -1,7 +1,5 @@
 package src.com.JakeKrayger.nn.components;
 
-import java.util.ArrayList;
-
 import org.ejml.simple.SimpleMatrix;
 import src.com.JakeKrayger.nn.activation.ActivationFunction;
 

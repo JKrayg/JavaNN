@@ -17,7 +17,6 @@ import java.io.FileNotFoundException;
 import src.com.JakeKrayger.nn.activation.*;
 import src.com.JakeKrayger.nn.components.*;
 import src.com.JakeKrayger.nn.layers.*;
-import src.com.JakeKrayger.nn.nodes.InputNode;
 import src.com.JakeKrayger.nn.training.loss.CatCrossEntropy;
 import src.com.JakeKrayger.nn.training.optimizers.Adam;
 import src.com.JakeKrayger.nn.utils.MathUtils;

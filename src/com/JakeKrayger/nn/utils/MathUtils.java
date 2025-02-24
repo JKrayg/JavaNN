@@ -3,7 +3,6 @@ package src.com.JakeKrayger.nn.utils;
 
 import org.ejml.simple.SimpleMatrix;
 import src.com.JakeKrayger.nn.components.Layer;
-import src.com.JakeKrayger.nn.components.Node;
 
 public class MathUtils {
     // weighted sum for single node ∑(wi⋅xi)+b

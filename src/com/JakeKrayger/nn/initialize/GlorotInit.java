@@ -1,10 +1,7 @@
 package src.com.JakeKrayger.nn.initialize;
 
 import java.util.Random;
-
 import org.ejml.simple.SimpleMatrix;
-
-import src.com.JakeKrayger.nn.activation.ActivationFunction;
 import src.com.JakeKrayger.nn.components.*;
 
 public class GlorotInit extends InitWeights {
