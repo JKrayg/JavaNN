@@ -8,7 +8,6 @@ public class Layer {
     private SimpleMatrix activationsM;
     private SimpleMatrix weightsM;
     private SimpleMatrix biasV;
-    // private ArrayList<Node> nodes;
     private ActivationFunction func;
     private int inputSize;
 
@@ -24,20 +23,6 @@ public class Layer {
         this.func = func;
         this.inputSize = inputSize;
     }
-    // public Layer(ArrayList<Node> nodes) {
-    //     this.nodes = nodes;
-    // }
-
-    // public Layer(ArrayList<Node> nodes, ActivationFunction actFunc) {
-    //     this.nodes = nodes;
-    //     this.func = actFunc;
-    // }
-
-    // public Layer(ArrayList<Node> nodes, ActivationFunction actFunc, int inputSize) {
-    //     this.nodes = nodes;
-    //     this.func = actFunc;
-    //     this.inputSize = inputSize;
-    // }
 
     public int getNumNeurons() {
         return numNeurons;
@@ -54,10 +39,6 @@ public class Layer {
     public SimpleMatrix getBias() {
         return biasV;
     }
-
-    // public ArrayList<Node> getNodes() {
-    //     return nodes;
-    // }
 
     public ActivationFunction getActFunc() {
         return func;
