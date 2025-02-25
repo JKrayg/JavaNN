@@ -6,31 +6,37 @@ import src.com.JakeKrayger.nn.components.Layer;
 public class MathUtils {
     // weighted sum for single node ∑(wi⋅xi)+b
     public SimpleMatrix weightedSum(Layer prevLayer, Layer currLayer) {
-        double[][] bias = new double[currLayer.getWeights().getNumRows()][currLayer.getBias().getNumCols()];
-        for (int i = 0; i < currLayer.getWeights().getNumRows(); i++) {
-            for (int j = 0; j < currLayer.getWeights().getNumCols(); j++) {
-                bias[i][j] = currLayer.getBias().transpose().get(j);
+        SimpleMatrix weights = currLayer.getWeights();
+        SimpleMatrix biasT = currLayer.getBias().transpose();
+        SimpleMatrix dot = prevLayer.getActivations().mult(weights);
+        int rows = dot.getNumRows();
+        int cols = dot.getNumCols();
+        double[][] bias = new double[rows][cols];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                bias[i][j] = biasT.get(j);
             }
         }
 
-        SimpleMatrix bm = new SimpleMatrix(bias);
-        return prevLayer.getActivations().mult(currLayer.getWeights()).plus(bm);
+        return dot.plus(new SimpleMatrix(bias));
     }
 
-    public SimpleMatrix weightedSum(double[][] inputData, Layer currLayer) {
-        SimpleMatrix data = new SimpleMatrix(inputData);
-        double[][] bias = new double[currLayer.getWeights().getNumRows()][currLayer.getWeights().getNumCols()];
-        for (int i = 0; i < currLayer.getWeights().getNumRows(); i++) {
-            for (int j = 0; j < currLayer.getWeights().getNumCols(); j++) {
-                bias[i][j] = currLayer.getBias().transpose().get(j);
+    public SimpleMatrix weightedSum(SimpleMatrix inputData, Layer currLayer) {
+        SimpleMatrix weights = currLayer.getWeights();
+        SimpleMatrix biasT = currLayer.getBias().transpose();
+        SimpleMatrix dot = inputData.mult(weights);
+        int rows = dot.getNumRows();
+        int cols = dot.getNumCols();
+        double[][] bias = new double[rows][cols];
+        
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                bias[i][j] = biasT.get(j);
             }
         }
-
-        SimpleMatrix b = new SimpleMatrix(bias);
-        System.out.println(data);
-        System.out.println(currLayer.getWeights());
-        System.out.println(new SimpleMatrix(data.mult(currLayer.getWeights())).plus(b));
-        return new SimpleMatrix(data.mult(currLayer.getWeights())).plus(b);
+        
+        return dot.plus(new SimpleMatrix(bias));
     }
 
     public double mean(double[] dubs) {
@@ -46,9 +52,20 @@ public class MathUtils {
         double mean = this.mean(dubs);
         double v = 0;
         for (double d: dubs) {
-            v = v + ((d - mean) * (d - mean));
+            v += ((d - mean) * (d - mean));
         }
 
         return Math.sqrt(v / dubs.length);
+    }
+
+    public double std(SimpleMatrix v) {
+        double mean = (v.elementSum() / v.getNumElements());
+        double s = 0;
+
+        for (int i = 0; i < v.getNumElements(); i++) {
+            s += (v.get(i) - mean) * (v.get(i) - mean);
+        }
+
+        return Math.sqrt(s / v.getNumElements());
     }
 }

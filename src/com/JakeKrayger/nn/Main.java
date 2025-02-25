@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.AbstractMap.SimpleEntry;
@@ -50,23 +51,30 @@ public class Main {
         // } catch (FileNotFoundException e) {
         //     e.printStackTrace();
         // }
-
-        double[] sample1 = new double[]{0.1, 0.2, 0.3, 0.4};
-        double[] sample2 = new double[]{0.5, 0.6, 0.7, 0.8};
-        double[] sample3 = new double[]{0.9, 0.10, 0.11, 0.12};
-        double[] sample4 = new double[]{0.13, 0.14, 0.15, 0.16};
-        double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4};
+        Random random = new Random();
+        double[] sample1 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
+        double[] sample2 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
+        double[] sample3 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
+        double[] sample4 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
+        double[] sample5 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
+        double[][] sampleData = new double[][]{sample1, sample2, sample3,sample4, sample5};
         String[] labels = {"R", "B", "B", "G"};
         Set<String> classes = new HashSet<>(List.of(labels));
 
-
+        MathUtils maths = new MathUtils();
+        // for (int i = 0; i < )
         Data data = new Data(sampleData);
         // System.out.println(data.getData());
+        data.scale();
+        System.out.println("Scaled input data: \n" + data.getData());
+
+
+
         NeuralNet nn = new NeuralNet();
 
         // InputLayer in = new InputLayer(data);
-        Dense d1 = new Dense(3, new ReLU(), 4);
-        Dense d2 = new Dense(3, new ReLU());
+        Dense d1 = new Dense(3, new Sigmoid(), 3);
+        Dense d2 = new Dense(3, new Sigmoid());
         nn.addLayer(d1);
         nn.addLayer(d2);
 
@@ -80,9 +88,9 @@ public class Main {
 
         // System.out.println(d1.getBias());
 
-        MathUtils maths = new MathUtils();
+        // MathUtils maths = new MathUtils();
         ReLU relu = new ReLU();
-        System.out.println(relu.execute(maths.weightedSum(sampleData, d1)));
+        System.out.println("activation matrix after ReLU function: \n" + relu.execute(maths.weightedSum(data.getData(), d1)));
 
 
     }

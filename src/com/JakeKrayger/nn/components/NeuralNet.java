@@ -15,22 +15,28 @@ public class NeuralNet {
     private ArrayList<Layer> layers;
     private Optimizer optimizer;
     private Loss loss;
+    private int batchSize;
 
     public ArrayList<Layer> getLayers() {
         return layers;
     }
 
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
+
     public void addLayer(Layer l) {
+        ActivationFunction actFunc = l.getActFunc();
         if (this.layers != null) {
             Layer prevLayer = this.layers.get(this.layers.size() - 1);
-            if (l.getActFunc() instanceof ReLU) {
+            if (actFunc instanceof ReLU) {
                 l.setWeights(new HeInit().initWeight(prevLayer, l));
             } else {
                 l.setWeights(new GlorotInit().initWeight(prevLayer, l));
             }
         } else {
             layers = new ArrayList<>();
-            if (l.getActFunc() instanceof ReLU) {
+            if (actFunc instanceof ReLU) {
                 l.setWeights(new SimpleMatrix(new HeInit().initWeight(l.getInputSize(), l)));
             } else {
                 l.setWeights(new SimpleMatrix(new GlorotInit().initWeight(l.getInputSize(), l)));
@@ -51,11 +57,6 @@ public class NeuralNet {
         }
 
         System.out.println(firstBatch);
-
-        // for (Node n: layers.getFirst().getNodes()) {
-        // ActivationFunction af = layers.getFirst().getActFunc();
-        // n.setValues();
-        // }
 
         // System.out.println(firstBatch);
 
@@ -80,7 +81,6 @@ public class NeuralNet {
     // -> use error and learning rate to adjust weights and biases
     // -> update weights and biases
     // -> apply updates and prepare for next forward pass
-    public void fit() {
-    }
+    public void fit() {}
 
 }
