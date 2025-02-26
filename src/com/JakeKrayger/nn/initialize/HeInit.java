@@ -6,33 +6,24 @@ import src.com.JakeKrayger.nn.components.Layer;
 
 public class HeInit extends InitWeights {
     public SimpleMatrix initWeight(Layer prev, Layer curr) {
-        int prevNeurons = prev.getNumNeurons();
-        int currNeurons = curr.getNumNeurons();
-        double std = Math.sqrt(2.0 / prevNeurons);
-        double[][] weights = new double[prevNeurons][currNeurons];
-
-        for (int i = 0; i < prevNeurons; i++) {
-            for (int j = 0; j < currNeurons; j++) {
-                Random rand = new Random();
-                weights[i][j] = rand.nextGaussian() * std;
-            }
-        }
-
-        return new SimpleMatrix(weights);
+        return new SimpleMatrix(setWeights(prev.getNumNeurons(), curr.getNumNeurons()));
     }
 
     public SimpleMatrix initWeight(int inputSize, Layer curr) {
-        int currNeurons = curr.getNumNeurons();
-        double std = Math.sqrt(2.0 / inputSize);
-        double[][] weights = new double[inputSize][currNeurons];
+        return new SimpleMatrix(setWeights(inputSize, curr.getNumNeurons()));
+    }
 
-        for (int i = 0; i < inputSize; i++) {
-            for (int j = 0; j < currNeurons; j++) {
-                Random rand = new Random();
+    private static double[][] setWeights(int rows, int cols) {
+        double std = Math.sqrt(2.0 / rows);
+        double[][] weights = new double[rows][cols];
+        Random rand = new Random();
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 weights[i][j] = rand.nextGaussian() * std;
             }
         }
 
-        return new SimpleMatrix(weights);
+        return weights;
     }
 }

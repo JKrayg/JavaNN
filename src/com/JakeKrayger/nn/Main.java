@@ -58,14 +58,14 @@ public class Main {
         double[] sample4 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
         double[] sample5 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
         double[][] sampleData = new double[][]{sample1, sample2, sample3,sample4, sample5};
-        String[] labels = {"R", "B", "B", "G"};
+        String[] labels = {"T", "F", "T", "T", "F"};
         Set<String> classes = new HashSet<>(List.of(labels));
 
         MathUtils maths = new MathUtils();
         // for (int i = 0; i < )
-        Data data = new Data(sampleData);
+        Data data = new Data(sampleData, labels);
         // System.out.println(data.getData());
-        data.scale();
+        data.zScoreNormalization();
         System.out.println("Scaled input data: \n" + data.getData());
 
 
@@ -73,24 +73,25 @@ public class Main {
         NeuralNet nn = new NeuralNet();
 
         // InputLayer in = new InputLayer(data);
-        Dense d1 = new Dense(3, new Sigmoid(), 3);
-        Dense d2 = new Dense(3, new Sigmoid());
+        Dense d1 = new Dense(3, new ReLU(), 3);
+        Dense d2 = new Dense(3, new ReLU());
+        Dense d3 = new Dense(3, new Softmax());
         nn.addLayer(d1);
         nn.addLayer(d2);
+        nn.addLayer(d3);
 
-
-        // for (Layer l: nn.getLayers()) {
-        //     System.out.println(l);
-        //     System.out.println(l.getWeights());
-        //     System.out.println(l.getbias());
-        //     System.out.println();
-        // }
-
-        // System.out.println(d1.getBias());
-
-        // MathUtils maths = new MathUtils();
         ReLU relu = new ReLU();
-        System.out.println("activation matrix after ReLU function: \n" + relu.execute(maths.weightedSum(data.getData(), d1)));
+        Softmax softmax = new Softmax();
+        SimpleMatrix d1Act = relu.execute(maths.weightedSum(data.getData(), d1));
+        System.out.println("d1 activation matrix after ReLU function: \n" + d1Act);
+        d1.setActivations(d1Act);
+        SimpleMatrix d2Act = relu.execute(maths.weightedSum(d1, d2));
+        System.out.println("d2 activation matrix after ReLU function: \n" + d2Act);
+        d2.setActivations(d2Act);
+        // System.out.println(maths.weightedSum(d2, d3));
+        SimpleMatrix d3Act = softmax.execute(maths.weightedSum(d2, d3));
+        System.out.println("d3 activation matrix after Softmax function: \n" + d3Act);
+        d2.setActivations(d3Act);
 
 
     }
