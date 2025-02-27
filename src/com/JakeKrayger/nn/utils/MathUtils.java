@@ -20,7 +20,7 @@ public class MathUtils {
         int rows = dot.getNumRows();
         int cols = dot.getNumCols();
         double[][] bias = new double[rows][cols];
-        
+
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 bias[i][j] = biasT.get(j);

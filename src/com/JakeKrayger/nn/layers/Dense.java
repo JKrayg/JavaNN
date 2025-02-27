@@ -18,7 +18,7 @@ public class Dense extends Layer {
     private static SimpleMatrix createBiasV(int numNeurons) {
         double[] b = new double[numNeurons];
         for (int i = 0; i < numNeurons; i++) {
-            b[i] = 0.0;
+            b[i] = 0.01;
         }
         return new SimpleMatrix(b);
     }

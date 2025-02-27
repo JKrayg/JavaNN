@@ -1,14 +1,15 @@
 package src.com.JakeKrayger.nn;
 
 import org.ejml.simple.SimpleMatrix;
-
 import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class Data {
     private SimpleMatrix data;
     private String[] labels;
+    private int[] labelsInt;
 
-    public Data() {}
+    public Data() {
+    }
 
     public Data(double[][] data) {
         this.data = new SimpleMatrix(data);
@@ -19,8 +20,9 @@ public class Data {
         this.labels = labels;
     }
 
-    public Data(String filename) {
-        
+    public Data(double[][] data, int[] labels) {
+        this.data = new SimpleMatrix(data);
+        this.labelsInt = labels;
     }
 
     public SimpleMatrix getData() {
@@ -40,7 +42,7 @@ public class Data {
                     data.set(j, i, (data.get(j, i) - mean) / std);
                 }
             }
-            
+
         }
     }
 }
