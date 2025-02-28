@@ -1,12 +1,16 @@
 package src.com.JakeKrayger.nn;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.ejml.simple.SimpleMatrix;
 import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class Data {
     private SimpleMatrix data;
-    private String[] labels;
-    private int[] labelsInt;
+    private double[] labels;
+    private HashMap<String, Integer> classes;
 
     public Data() {
     }
@@ -17,16 +21,35 @@ public class Data {
 
     public Data(double[][] data, String[] labels) {
         this.data = new SimpleMatrix(data);
-        this.labels = labels;
-    }
 
-    public Data(double[][] data, int[] labels) {
-        this.data = new SimpleMatrix(data);
-        this.labelsInt = labels;
+        // create a hashtable of distinct labels mapped to an integer
+        HashMap<String, Integer> h = new HashMap<>();
+        Set<String> c = new HashSet<>(List.of(labels));
+        int count = 0;
+        for (String s: c) {
+            h.put(s, count);
+            count++;
+        }
+        this.classes = h;
+
+        // create list of a label values
+        double[] ls = new double[labels.length];
+        for (int i = 0; i < labels.length; i++) {
+            ls[i] = classes.get(labels[i]);
+        }
+        this.labels = ls;
     }
 
     public SimpleMatrix getData() {
         return data;
+    }
+
+    public double[] getLabels() {
+        return labels;
+    }
+
+    public HashMap<String, Integer> getClasses() {
+        return classes;
     }
 
     public void zScoreNormalization() {

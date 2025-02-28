@@ -84,7 +84,7 @@ public class Main {
         double[] sample4 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
         double[] sample5 = new double[]{random.nextDouble() * 50, random.nextDouble() * 50, random.nextDouble() * 50};
         double[][] sampleData = new double[][]{sample1, sample2, sample3,sample4, sample5};
-        int[] labels = {1, 0, 1, 1, 0};
+        String[] labels = {"T", "F", "T", "T", "F"};
         // Set<String> classes = new HashSet<>(List.of(labels));
 
         MathUtils maths = new MathUtils();
@@ -120,7 +120,12 @@ public class Main {
         // nn.compile(new Adam(), new BinCrossEntropy());
 
         BinCrossEntropy bce = new BinCrossEntropy();
-        System.out.println(bce.execute(d3.getActivations(), labels));
+        System.out.println(bce.execute(d3.getActivations(), data.getLabels()));
+
+        System.out.println(data.getClasses());
+        for (int i = 0; i < data.getLabels().length; i++) {
+            System.out.println(data.getLabels()[i]);
+        }
 
 
 
