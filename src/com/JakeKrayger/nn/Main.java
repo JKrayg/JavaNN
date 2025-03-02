@@ -58,10 +58,10 @@ public class Main {
 
         cols = dta.get(0).length;
 
-        String[] labs = new String[8];
-        double[][] dats = new double[8][cols];
+        String[] labs = new String[3];
+        double[][] dats = new double[3][cols];
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 3; i++) {
             Random rand = new Random();
             int r = rand.nextInt(rows);
             dats[i] = dta.get(r);
@@ -121,6 +121,9 @@ public class Main {
         BinCrossEntropy bce = new BinCrossEntropy();
         System.out.println("value after binary cross entropy:");
         System.out.println(bce.execute(d3.getActivations(), data.getLabels()));
+
+        System.out.println("\ngradient of output:");
+        System.out.println(bce.outputGradient(d3.getActivations(), data.getLabels()));
 
         System.out.println("\nclasses:");
         System.out.println(data.getClasses());

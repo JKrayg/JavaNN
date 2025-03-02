@@ -15,4 +15,8 @@ public class BinCrossEntropy extends Loss {
         }
         return sumLoss / n;
     }
+
+    public SimpleMatrix outputGradient(SimpleMatrix activations, double[] labels) {
+        return activations.minus(new SimpleMatrix(labels)).divide(labels.length);
+    }
 }

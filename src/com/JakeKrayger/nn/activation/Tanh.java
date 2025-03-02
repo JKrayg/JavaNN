@@ -7,7 +7,8 @@ public class Tanh extends ActivationFunction {
         double[] v = new double[z.getNumRows()];
 
         for (int i = 0; i < z.getNumRows(); i++) {
-            v[i] = (Math.exp(z.get(i)) - Math.exp(-z.get(i))) / (Math.exp(z.get(i)) + Math.exp(-z.get(i)));
+            double curr = z.get(i);
+            v[i] = (Math.exp(curr) - Math.exp(-curr)) / (Math.exp(curr) + Math.exp(-curr));
         }
         return new SimpleMatrix(v);
     }
