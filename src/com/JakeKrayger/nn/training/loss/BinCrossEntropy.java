@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.training.loss;
 
 import org.ejml.simple.SimpleMatrix;
 
+import src.com.JakeKrayger.nn.components.Layer;
+
 public class BinCrossEntropy extends Loss {
     public double execute(SimpleMatrix activations, double[] labels) {
         double sumLoss = 0.0;
@@ -16,7 +18,12 @@ public class BinCrossEntropy extends Loss {
         return sumLoss / n;
     }
 
-    public SimpleMatrix outputGradient(SimpleMatrix activations, double[] labels) {
-        return activations.minus(new SimpleMatrix(labels)).divide(labels.length);
+    public SimpleMatrix outputGradientWeights(Layer currLayer, Layer prevLayer, double[] labels) {
+        SimpleMatrix error = outputGradientBias(currLayer, labels);
+        return (prevLayer.getActivations().transpose()).mult(error).divide(labels.length);
+    }
+
+    public SimpleMatrix outputGradientBias(Layer currLayer, double[] labels) {
+        return currLayer.getActivations().minus(new SimpleMatrix(labels));
     }
 }

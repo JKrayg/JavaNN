@@ -24,75 +24,69 @@ import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class Main {
     public static void main(String[] args) {
-        String filePath = "src\\resources\\datasets\\wdbc.data";
-        ArrayList<double[]> dta = new ArrayList<>();
-        ArrayList<String> lbls = new ArrayList<>();
-        int rows = 0;
-        int cols = 0;
+        // String filePath = "src\\resources\\datasets\\wdbc.data";
+        // ArrayList<double[]> dta = new ArrayList<>();
+        // ArrayList<String> lbls = new ArrayList<>();
+        // int rows = 0;
+        // int cols = 0;
 
-        try {
-            File f = new File(filePath);
-            Scanner scan = new Scanner(f);
-            while (scan.hasNextLine()) {
-                rows += 1;
-                String line = scan.nextLine();
-                String[] splitLine = line.split(",", 3);
-                String label = splitLine[1];
-                lbls.add(label);
-                double[] toDub;
-                String values = splitLine[2];
-                String[] splitValues = values.split(",");
-                toDub = new double[splitValues.length];
+        // try {
+        //     File f = new File(filePath);
+        //     Scanner scan = new Scanner(f);
+        //     while (scan.hasNextLine()) {
+        //         rows += 1;
+        //         String line = scan.nextLine();
+        //         String[] splitLine = line.split(",", 3);
+        //         String label = splitLine[1];
+        //         lbls.add(label);
+        //         double[] toDub;
+        //         String values = splitLine[2];
+        //         String[] splitValues = values.split(",");
+        //         toDub = new double[splitValues.length];
 
-                for (int i = 0; i < splitValues.length; i++) {
-                    toDub[i] = Double.parseDouble(splitValues[i]);
-                }
+        //         for (int i = 0; i < splitValues.length; i++) {
+        //             toDub[i] = Double.parseDouble(splitValues[i]);
+        //         }
 
-                dta.add(toDub);
-            }
+        //         dta.add(toDub);
+        //     }
 
-            scan.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        //     scan.close();
+        // } catch (FileNotFoundException e) {
+        //     e.printStackTrace();
+        // }
 
-        cols = dta.get(0).length;
+        // cols = dta.get(0).length;
 
-        String[] labs = new String[3];
-        double[][] dats = new double[3][cols];
+        // String[] labs = new String[3];
+        // double[][] dats = new double[3][cols];
 
-        for (int i = 0; i < 3; i++) {
-            Random rand = new Random();
-            int r = rand.nextInt(rows);
-            dats[i] = dta.get(r);
-            labs[i] = lbls.get(r);
-        }
+        // for (int i = 0; i < 3; i++) {
+        //     Random rand = new Random();
+        //     int r = rand.nextInt(rows);
+        //     dats[i] = dta.get(r);
+        //     labs[i] = lbls.get(r);
+        // }
 
-        // Random random = new Random();
-        // double[] sample1 = new double[]{random.nextDouble() * 50, random.nextDouble()
-        // * 50, random.nextDouble() * 50};
-        // double[] sample2 = new double[]{random.nextDouble() * 50, random.nextDouble()
-        // * 50, random.nextDouble() * 50};
-        // double[] sample3 = new double[]{random.nextDouble() * 50, random.nextDouble()
-        // * 50, random.nextDouble() * 50};
-        // double[] sample4 = new double[]{random.nextDouble() * 50, random.nextDouble()
-        // * 50, random.nextDouble() * 50};
-        // double[] sample5 = new double[]{random.nextDouble() * 50, random.nextDouble()
-        // * 50, random.nextDouble() * 50};
-        // double[][] sampleData = new double[][]{sample1, sample2, sample3,sample4,
-        // sample5};
-        // String[] labels = {"T", "F", "T", "T", "F"};
-        // Set<String> classes = new HashSet<>(List.of(labels));
-        // Data data = new Data(sampleData, labels);
-        // data.zScoreNormalization();
-
-        // System.out.println("Scaled input data: \n" + data.getData());
-        Data data = new Data(dats, labs);
+        Random random = new Random();
+        double[] sample1 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        double[] sample2 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        double[] sample3 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        double[] sample4 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        double[] sample5 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        double[] sample6 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4, sample5, sample6};
+        String[] labels = {"T", "F", "T", "T", "T", "F"};
+        Data data = new Data(sampleData, labels);
         data.zScoreNormalization();
 
+        // System.out.println("Scaled input data: \n" + data.getData());
+        // Data data = new Data(dats, labs);
+        // data.zScoreNormalization();
+
         NeuralNet nn = new NeuralNet();
-        Dense d1 = new Dense(6, new ReLU(), 30);
-        Dense d2 = new Dense(7, new ReLU());
+        Dense d1 = new Dense(3, new ReLU(), 3);
+        Dense d2 = new Dense(5, new ReLU());
         Dense d3 = new Dense(1, new Sigmoid());
         nn.addLayer(d1);
         nn.addLayer(d2);
@@ -119,14 +113,18 @@ public class Main {
         // nn.compile(new Adam(), new BinCrossEntropy());
 
         BinCrossEntropy bce = new BinCrossEntropy();
-        System.out.println("value after binary cross entropy:");
+        System.out.println("loss:");
         System.out.println(bce.execute(d3.getActivations(), data.getLabels()));
 
-        System.out.println("\ngradient of output:");
-        System.out.println(bce.outputGradient(d3.getActivations(), data.getLabels()));
+        System.out.println("\ngradient of output wrt to bias:");
+        System.out.println(bce.outputGradientBias(d3, data.getLabels()));
+
+        System.out.println("\ngradient of output wrt to weights:");
+        System.out.println(bce.outputGradientWeights(d3, d2, data.getLabels()));
 
         System.out.println("\nclasses:");
         System.out.println(data.getClasses());
+        
         System.out.println("\nlabels:");
         for (int i = 0; i < data.getLabels().length; i++) {
         System.out.println(data.getLabels()[i]);
