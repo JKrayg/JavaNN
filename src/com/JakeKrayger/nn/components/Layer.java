@@ -52,6 +52,15 @@ public class Layer {
         this.weightsM = weights;
     }
 
+    public void updateWeights(SimpleMatrix gradientWrtWeights, double learningRate) {
+        this.weightsM = this.weightsM.minus(gradientWrtWeights.scale(learningRate));
+    }
+
+    public void updateBiases(SimpleMatrix gradientWrtBiases, double learningRate) {
+        double mean = gradientWrtBiases.elementSum() / gradientWrtBiases.getNumRows();
+        this.biasV = this.biasV.minus(mean * learningRate);
+    }
+
     public void setActivations(SimpleMatrix activations) {
         this.activationsM = activations;
     }

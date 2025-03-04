@@ -115,16 +115,32 @@ public class Main {
         BinCrossEntropy bce = new BinCrossEntropy();
         System.out.println("loss:");
         System.out.println(bce.execute(d3.getActivations(), data.getLabels()));
-
-        System.out.println("\ngradient of output wrt to bias:");
-        System.out.println(bce.outputGradientBias(d3, data.getLabels()));
-
+        
+        SimpleMatrix gradientWrtWeights = bce.outputGradientWeights(d3, d2, data.getLabels());
         System.out.println("\ngradient of output wrt to weights:");
-        System.out.println(bce.outputGradientWeights(d3, d2, data.getLabels()));
+        System.out.println(gradientWrtWeights);
+
+        System.out.println("d3 initialized weights:");
+        System.out.println(d3.getWeights());
+
+        System.out.println("d3 updated weights:");
+        d3.updateWeights(gradientWrtWeights, 0.1);
+        System.out.println(d3.getWeights());
+
+        SimpleMatrix gradientWrtBias = bce.outputGradientBias(d3, data.getLabels());
+        System.out.println("\ngradient of output wrt to bias:");
+        System.out.println(gradientWrtBias);
+
+        System.out.println("d3 initialized bias:");
+        System.out.println(d3.getBias());
+
+        System.out.println("d3 updated biases:");
+        d3.updateBiases(gradientWrtBias, 0.1);
+        System.out.println(d3.getBias());
 
         System.out.println("\nclasses:");
         System.out.println(data.getClasses());
-        
+
         System.out.println("\nlabels:");
         for (int i = 0; i < data.getLabels().length; i++) {
         System.out.println(data.getLabels()[i]);
