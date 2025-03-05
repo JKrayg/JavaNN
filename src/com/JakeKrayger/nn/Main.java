@@ -68,83 +68,66 @@ public class Main {
         //     labs[i] = lbls.get(r);
         // }
 
+        // Data data = new Data(dats, labs);
+        // data.zScoreNormalization();
+
         Random random = new Random();
         double[] sample1 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
         double[] sample2 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
         double[] sample3 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
         double[] sample4 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
         double[] sample5 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        double[] sample6 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4, sample5, sample6};
-        String[] labels = {"T", "F", "T", "T", "T", "F"};
+        double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4, sample5};
+        String[] labels = {"T", "F", "T", "T", "F"};
         Data data = new Data(sampleData, labels);
         data.zScoreNormalization();
-
-        // System.out.println("Scaled input data: \n" + data.getData());
-        // Data data = new Data(dats, labs);
-        // data.zScoreNormalization();
+        
 
         NeuralNet nn = new NeuralNet();
-        Dense d1 = new Dense(3, new ReLU(), 3);
-        Dense d2 = new Dense(5, new ReLU());
+        Dense d1 = new Dense(2, new ReLU(), 3);
+        Dense d2 = new Dense(2, new ReLU());
         Dense d3 = new Dense(1, new Sigmoid());
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
 
-        MathUtils maths = new MathUtils();
-        ReLU relu = new ReLU();
-        Softmax softmax = new Softmax();
-        Sigmoid sigmoid = new Sigmoid();
-
-        SimpleMatrix d1Act = relu.execute(maths.weightedSum(data.getData(), d1));
-        System.out.println("d1 activation matrix after ReLU function: \n" + d1Act);
-        d1.setActivations(d1Act);
-
-        SimpleMatrix d2Act = relu.execute(maths.weightedSum(d1, d2));
-        System.out.println("d2 activation matrix after ReLU function: \n" + d2Act);
-        d2.setActivations(d2Act);
-
-        SimpleMatrix d3Act = sigmoid.execute(maths.weightedSum(d2, d3));
-        System.out.println("d3 activation matrix after Sigmoid function: \n" +
-        d3Act);
-        d3.setActivations(d3Act);
+        nn.singleForwardProp(data);
 
         // nn.compile(new Adam(), new BinCrossEntropy());
 
-        BinCrossEntropy bce = new BinCrossEntropy();
-        System.out.println("loss:");
-        System.out.println(bce.execute(d3.getActivations(), data.getLabels()));
+        // BinCrossEntropy bce = new BinCrossEntropy();
+        // System.out.println("loss:");
+        // System.out.println(bce.execute(d3.getActivations(), data.getLabels()));
         
-        SimpleMatrix gradientWrtWeights = bce.outputGradientWeights(d3, d2, data.getLabels());
-        System.out.println("\ngradient of output wrt to weights:");
-        System.out.println(gradientWrtWeights);
+        // SimpleMatrix gradientWrtWeights = bce.outputGradientWeights(d3, d2, data.getLabels());
+        // System.out.println("\ngradient of output wrt to weights:");
+        // System.out.println(gradientWrtWeights);
 
-        System.out.println("d3 initialized weights:");
-        System.out.println(d3.getWeights());
+        // System.out.println("d3 initialized weights:");
+        // System.out.println(d3.getWeights());
 
-        System.out.println("d3 updated weights:");
-        d3.updateWeights(gradientWrtWeights, 0.1);
-        System.out.println(d3.getWeights());
+        // System.out.println("d3 updated weights:");
+        // d3.updateWeights(gradientWrtWeights, 0.1);
+        // System.out.println(d3.getWeights());
 
-        SimpleMatrix gradientWrtBias = bce.outputGradientBias(d3, data.getLabels());
-        System.out.println("\ngradient of output wrt to bias:");
-        System.out.println(gradientWrtBias);
+        // SimpleMatrix gradientWrtBias = bce.outputGradientBias(d3, data.getLabels());
+        // System.out.println("\ngradient of output wrt to bias:");
+        // System.out.println(gradientWrtBias);
 
-        System.out.println("d3 initialized bias:");
-        System.out.println(d3.getBias());
+        // System.out.println("d3 initialized bias:");
+        // System.out.println(d3.getBias());
 
-        System.out.println("d3 updated biases:");
-        d3.updateBiases(gradientWrtBias, 0.1);
-        System.out.println(d3.getBias());
+        // System.out.println("d3 updated biases:");
+        // d3.updateBiases(gradientWrtBias, 0.1);
+        // System.out.println(d3.getBias());
 
-        System.out.println("\nclasses:");
-        System.out.println(data.getClasses());
+        // System.out.println("\nclasses:");
+        // System.out.println(data.getClasses());
 
-        System.out.println("\nlabels:");
-        for (int i = 0; i < data.getLabels().length; i++) {
-        System.out.println(data.getLabels()[i]);
-        }
+        // System.out.println("\nlabels:");
+        // for (int i = 0; i < data.getLabels().length; i++) {
+        // System.out.println(data.getLabels()[i]);
+        // }
 
     }
 }

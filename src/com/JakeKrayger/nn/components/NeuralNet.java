@@ -10,6 +10,7 @@ import src.com.JakeKrayger.nn.initialize.*;
 import src.com.JakeKrayger.nn.layers.*;
 import src.com.JakeKrayger.nn.training.loss.*;
 import src.com.JakeKrayger.nn.training.optimizers.*;
+import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class NeuralNet {
     private ArrayList<Layer> layers;
@@ -81,6 +82,19 @@ public class NeuralNet {
     // -> use error and learning rate to adjust weights and biases
     // -> update weights and biases
     // -> apply updates and prepare for next forward pass
-    public void fit() {}
+    public void singleForwardProp(Data data) {
+        MathUtils maths = new MathUtils();
+        Layer L1 = layers.get(0);
+        SimpleMatrix act = L1.getActFunc().execute(maths.weightedSum(data.getData(), L1));
+        System.out.println("L1 activation matrix after " + L1.getActFunc().getClass().getSimpleName() + " function: \n" + act);
+        L1.setActivations(act);
+        for (int i = 1; i < layers.size(); i++) {
+            Layer curr = layers.get(i);
+            Layer prev = layers.get(i - 1);
+            SimpleMatrix currAct = curr.getActFunc().execute(maths.weightedSum(prev, curr));
+            System.out.println("L" + (i + 1) + " activation matrix after " + curr.getActFunc().getClass().getSimpleName() + " function: \n" + currAct);
+            curr.setActivations(currAct);
+        }
+    }
 
 }

@@ -8,6 +8,8 @@ public class Layer {
     private SimpleMatrix activationsM;
     private SimpleMatrix weightsM;
     private SimpleMatrix biasV;
+    private SimpleMatrix gradientWrtWeights;
+    private SimpleMatrix gradientWrtBiases;
     private ActivationFunction func;
     private int inputSize;
 
@@ -50,6 +52,14 @@ public class Layer {
 
     public void setWeights(SimpleMatrix weights) {
         this.weightsM = weights;
+    }
+
+    public void setGradientWeights(SimpleMatrix gWrtW) {
+        this.gradientWrtWeights = gWrtW;
+    }
+
+    public void setGradientBiases(SimpleMatrix gWrtB) {
+        this.gradientWrtBiases = gWrtB;
     }
 
     public void updateWeights(SimpleMatrix gradientWrtWeights, double learningRate) {
