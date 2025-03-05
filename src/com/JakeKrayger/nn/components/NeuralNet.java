@@ -17,6 +17,7 @@ public class NeuralNet {
     private Optimizer optimizer;
     private Loss loss;
     private int batchSize;
+    private Data singleBatch;
 
     public ArrayList<Layer> getLayers() {
         return layers;
@@ -63,25 +64,12 @@ public class NeuralNet {
 
     }
 
-    public void compile(Optimizer o, Loss l) {
+    public void compile(Data singleBatch, Optimizer o, Loss l) {
         this.optimizer = o;
         this.loss = l;
+        this.singleBatch = singleBatch;
     }
 
-    // FORWARD PASS:
-    // -> input new values
-    // -> update values of nodes in hidden layer with activation function (repeat for all hidden layers)
-    // -> update values of nodes in output layer using the activation function
-
-    // BACK PROPAGATION
-    // -> compute output layer error
-    // -> use loss function to get difference between predicted and actual values
-    // -> compute error for hidden layers
-    // -> pass error backward using weight connections and activation function derivative
-    // -> compute weight and bias updates
-    // -> use error and learning rate to adjust weights and biases
-    // -> update weights and biases
-    // -> apply updates and prepare for next forward pass
     public void singleForwardProp(Data data) {
         MathUtils maths = new MathUtils();
         Layer L1 = layers.get(0);
@@ -95,6 +83,51 @@ public class NeuralNet {
             System.out.println("L" + (i + 1) + " activation matrix after " + curr.getActFunc().getClass().getSimpleName() + " function: \n" + currAct);
             curr.setActivations(currAct);
         }
+
+        getOutputGradients(data);
+    }
+
+    public void getOutputGradients(Data data) {
+        // get gradient of loss wrt to output
+        // use to get gradient of loss wrt weights/biases
+        // use to get gradient of loss wrt to previous layers activation
+        Layer out = layers.get(layers.size() - 1);
+        Layer prev = layers.get(layers.size() - 2);
+        System.out.println("loss:");
+        System.out.println(loss.execute(out.getActivations(), data.getLabels()));
+
+        System.out.println("\ngradient of loss wrt to output:");
+        System.out.println(out.getActivations().minus(new SimpleMatrix(data.getLabels())));
+        
+        SimpleMatrix gradientWrtWeights = loss.outputGradientWeights(out, prev, data.getLabels());
+        out.setGradientWeights(gradientWrtWeights);
+        System.out.println("\ngradient of output wrt to weights:");
+        System.out.println(gradientWrtWeights);
+
+        // System.out.println("d2 initialized weights:");
+        // System.out.println(prev.getWeights());
+
+        // System.out.println("d3 initialized weights:");
+        // System.out.println(out.getWeights());
+
+        // System.out.println("d3 updated weights:");
+        // out.updateWeights(gradientWrtWeights, 0.1);
+        // System.out.println(out.getWeights());
+
+        SimpleMatrix gradientWrtBias = loss.outputGradientBias(out, data.getLabels());
+        out.setGradientBiases(gradientWrtBias);
+        System.out.println("\ngradient of output wrt to bias:");
+        System.out.println(gradientWrtBias);
+
+        System.out.println("gradient passed to previous layer:");
+        System.out.println(gradientWrtBias.mult(out.getWeights().transpose()));
+
+        // System.out.println("d3 initialized bias:");
+        // System.out.println(out.getBias());
+
+        // System.out.println("d3 updated biases:");
+        // out.updateBiases(gradientWrtBias, 0.1);
+        // System.out.println(out.getBias());
     }
 
 }

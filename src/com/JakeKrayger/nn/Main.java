@@ -90,10 +90,10 @@ public class Main {
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-
+        nn.compile(data, new Adam(), new BinCrossEntropy());
         nn.singleForwardProp(data);
 
-        // nn.compile(new Adam(), new BinCrossEntropy());
+        
 
         // BinCrossEntropy bce = new BinCrossEntropy();
         // System.out.println("loss:");
@@ -121,13 +121,13 @@ public class Main {
         // d3.updateBiases(gradientWrtBias, 0.1);
         // System.out.println(d3.getBias());
 
-        // System.out.println("\nclasses:");
-        // System.out.println(data.getClasses());
+        System.out.println("\nclasses:");
+        System.out.println(data.getClasses());
 
-        // System.out.println("\nlabels:");
-        // for (int i = 0; i < data.getLabels().length; i++) {
-        // System.out.println(data.getLabels()[i]);
-        // }
+        System.out.println("\nlabels:");
+        for (int i = 0; i < data.getLabels().length; i++) {
+        System.out.println(data.getLabels()[i]);
+        }
 
     }
 }
