@@ -44,6 +44,11 @@ public class NeuralNet {
                 l.setWeights(new SimpleMatrix(new GlorotInit().initWeight(l.getInputSize(), l)));
             }
         }
+        
+        SimpleMatrix biases = new SimpleMatrix(l.getNumNeurons(), 1);
+        biases.fill(0.01);
+        l.setBiases(biases);
+
 
         this.layers.add(l);
 
@@ -70,10 +75,10 @@ public class NeuralNet {
         this.singleBatch = singleBatch;
     }
 
-    public void singleForwardProp(Data data) {
+    public void singlePass() {
         MathUtils maths = new MathUtils();
         Layer L1 = layers.get(0);
-        SimpleMatrix act = L1.getActFunc().execute(maths.weightedSum(data.getData(), L1));
+        SimpleMatrix act = L1.getActFunc().execute(maths.weightedSum(singleBatch.getData(), L1));
         System.out.println("L1 activation matrix after " + L1.getActFunc().getClass().getSimpleName() + " function: \n" + act);
         L1.setActivations(act);
         for (int i = 1; i < layers.size(); i++) {
@@ -84,50 +89,36 @@ public class NeuralNet {
             curr.setActivations(currAct);
         }
 
-        getOutputGradients(data);
+        getGradients(layers.get(layers.size() - 1));
     }
 
-    public void getOutputGradients(Data data) {
+    public void getGradients(Layer currLayer) {
         // get gradient of loss wrt to output
-        // use to get gradient of loss wrt weights/biases
-        // use to get gradient of loss wrt to previous layers activation
-        Layer out = layers.get(layers.size() - 1);
-        Layer prev = layers.get(layers.size() - 2);
-        System.out.println("loss:");
-        System.out.println(loss.execute(out.getActivations(), data.getLabels()));
+        // use to get gradient wrt weights/biases of current layer <----|
+        // use to get gradient wrt to previous layers activation        |
+        //      and pass this to next layer                             |
+        // repeat ------------------------------------------------------|
+        Layer curr = currLayer;
+        Layer prev = layers.get(layers.indexOf(curr) - 1);
 
         System.out.println("\ngradient of loss wrt to output:");
-        System.out.println(out.getActivations().minus(new SimpleMatrix(data.getLabels())));
+        SimpleMatrix gradientWrtOutput = curr.getActivations().minus(new SimpleMatrix(singleBatch.getLabels()));
+        System.out.println(gradientWrtOutput);
         
-        SimpleMatrix gradientWrtWeights = loss.outputGradientWeights(out, prev, data.getLabels());
-        out.setGradientWeights(gradientWrtWeights);
+        SimpleMatrix gradientWrtWeights = curr.outputGradientWeights(curr, prev, singleBatch.getLabels());
+        curr.setGradientWeights(gradientWrtWeights);
         System.out.println("\ngradient of output wrt to weights:");
         System.out.println(gradientWrtWeights);
 
-        // System.out.println("d2 initialized weights:");
-        // System.out.println(prev.getWeights());
-
-        // System.out.println("d3 initialized weights:");
-        // System.out.println(out.getWeights());
-
-        // System.out.println("d3 updated weights:");
-        // out.updateWeights(gradientWrtWeights, 0.1);
-        // System.out.println(out.getWeights());
-
-        SimpleMatrix gradientWrtBias = loss.outputGradientBias(out, data.getLabels());
-        out.setGradientBiases(gradientWrtBias);
+        SimpleMatrix gradientWrtBias = curr.outputGradientBias(curr, singleBatch.getLabels());
+        curr.setGradientBiases(gradientWrtBias);
         System.out.println("\ngradient of output wrt to bias:");
         System.out.println(gradientWrtBias);
 
         System.out.println("gradient passed to previous layer:");
-        System.out.println(gradientWrtBias.mult(out.getWeights().transpose()));
-
-        // System.out.println("d3 initialized bias:");
-        // System.out.println(out.getBias());
-
-        // System.out.println("d3 updated biases:");
-        // out.updateBiases(gradientWrtBias, 0.1);
-        // System.out.println(out.getBias());
+        // SimpleMatrix gradientWrtOutput = curr.getActivations().minus(new SimpleMatrix(singleBatch.getLabels()));
+        SimpleMatrix gradientForNextLayer = gradientWrtOutput.mult(curr.getWeights().transpose());
+        System.out.println(gradientWrtOutput.mult(curr.getWeights().transpose()));
     }
 
 }

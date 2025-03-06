@@ -86,12 +86,16 @@ public class Main {
         NeuralNet nn = new NeuralNet();
         Dense d1 = new Dense(2, new ReLU(), 3);
         Dense d2 = new Dense(2, new ReLU());
-        Dense d3 = new Dense(1, new Sigmoid());
+        Output d3 = new Output(1, new Sigmoid());
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.compile(data, new Adam(), new BinCrossEntropy());
-        nn.singleForwardProp(data);
+        nn.singlePass();
+
+        System.out.println(d1.getBias());
+        System.out.println(d2.getBias());
+        System.out.println(d3.getBias());
 
         
 
