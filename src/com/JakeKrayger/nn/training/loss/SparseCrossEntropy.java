@@ -8,11 +8,8 @@ public class SparseCrossEntropy extends Loss {
         return 0.0;
     }
 
-    // public SimpleMatrix outputGradientWeights(Layer out, Layer prev, double[] labels) {
-    //     return new SimpleMatrix(0, 0);
-    // }
-
-    public SimpleMatrix outputGradient(Layer out, SimpleMatrix labels) {
+    public SimpleMatrix gradient(Layer out, SimpleMatrix labels) {
+        // ***
         return out.getActivations().minus(labels);
     }
 }

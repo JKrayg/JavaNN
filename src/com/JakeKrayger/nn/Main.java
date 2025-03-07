@@ -72,32 +72,63 @@ public class Main {
         // data.zScoreNormalization();
 
         Random random = new Random();
-        double[] sample1 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        double[] sample2 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        double[] sample3 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        double[] sample4 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        double[] sample5 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        double[] sample1 = new double[]{1, 6, 11};
+        double[] sample2 = new double[]{2, 7, 12};
+        double[] sample3 = new double[]{3, 8, 13};
+        double[] sample4 = new double[]{4, 9, 14};
+        double[] sample5 = new double[]{5, 10, 15};
+        // double[] sample1 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // double[] sample2 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // double[] sample3 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // double[] sample4 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // double[] sample5 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
         double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4, sample5};
         String[] labels = {"T", "F", "T", "T", "F"};
-        Data data = new Data(sampleData, labels);
-        data.zScoreNormalization();
-        
+        Data data = new Data(sampleData, labels, 0.4);
+        // data.zScoreNormalization();
 
-        NeuralNet nn = new NeuralNet();
-        Dense d1 = new Dense(2, new ReLU(), 3);
-        Dense d2 = new Dense(2, new ReLU());
-        Output d3 = new Output(1, new Sigmoid());
-        nn.addLayer(d1);
-        nn.addLayer(d2);
-        nn.addLayer(d3);
-        nn.compile(data, new Adam(), new BinCrossEntropy());
-        nn.singlePass();
+        System.out.println("train data:");
+        System.out.println(data.getTrainData());
 
-        System.out.println(d1.getBias());
-        System.out.println(d2.getBias());
-        System.out.println(d3.getBias());
+        System.out.println("train labels:");
+        System.out.println(data.getTrainLabels());
 
-        
+        System.out.println("test data:");
+        System.out.println(data.getTestData());
+
+        System.out.println("test data:");
+        System.out.println(data.getTestLabels());
+
+
+
+        // NeuralNet nn = new NeuralNet();
+        // Dense d1 = new Dense(2, new ReLU(), 3);
+        // Dense d2 = new Dense(2, new ReLU());
+        // Output d3 = new Output(1, new Sigmoid());
+        // nn.addLayer(d1);
+        // nn.addLayer(d2);
+        // nn.addLayer(d3);
+        // nn.compile(data, new Adam(), new BinCrossEntropy());
+        // nn.singlePass();
+
+        // System.out.println("\nclasses:");
+        // System.out.println(data.getClasses());
+
+        // System.out.println("\nlabels:");
+        // for (int i = 0; i < data.getLabels().getNumElements(); i++) {
+        //     System.out.println(data.getLabels().get(i));
+        // }
+
+
+
+
+
+
+
+
+
+
+
 
         // BinCrossEntropy bce = new BinCrossEntropy();
         // System.out.println("loss:");
@@ -124,14 +155,6 @@ public class Main {
         // System.out.println("d3 updated biases:");
         // d3.updateBiases(gradientWrtBias, 0.1);
         // System.out.println(d3.getBias());
-
-        System.out.println("\nclasses:");
-        System.out.println(data.getClasses());
-
-        System.out.println("\nlabels:");
-        for (int i = 0; i < data.getLabels().getNumElements(); i++) {
-        System.out.println(data.getLabels().get(i));
-        }
 
     }
 }

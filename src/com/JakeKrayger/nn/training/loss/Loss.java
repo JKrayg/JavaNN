@@ -9,6 +9,6 @@ public abstract class Loss {
 
     // public abstract SimpleMatrix outputGradientWeights(Layer out, Layer prev, double[] labels);
 
-    public abstract SimpleMatrix outputGradient(Layer out, SimpleMatrix labels);
+    public abstract SimpleMatrix gradient(Layer out, SimpleMatrix labels);
     
 }

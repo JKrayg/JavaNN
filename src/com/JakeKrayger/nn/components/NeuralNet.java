@@ -18,6 +18,8 @@ public class NeuralNet {
     private Loss loss;
     private int batchSize;
     private Data singleBatch;
+    private Data training;
+    private Data testing;
 
     public ArrayList<Layer> getLayers() {
         return layers;
@@ -52,6 +54,17 @@ public class NeuralNet {
 
         this.layers.add(l);
 
+    }
+
+    public void compile(Data training, Data testing, Optimizer o, Loss l) {
+        this.optimizer = o;
+        this.loss = l;
+        this.training = training;
+        this.testing = testing;
+
+        for (Layer lyr: layers) {
+            lyr.setLoss(l);
+        }
     }
 
     public void compile(Data singleBatch, Optimizer o, Loss l) {

@@ -18,12 +18,7 @@ public class BinCrossEntropy extends Loss {
         return sumLoss / n;
     }
 
-    // public SimpleMatrix outputGradientWeights(Layer currLayer, Layer prevLayer, double[] labels) {
-    //     SimpleMatrix error = outputGradientBias(currLayer, labels);
-    //     return (prevLayer.getActivations().transpose()).mult(error).divide(labels.length);
-    // }
-
-    public SimpleMatrix outputGradient(Layer out, SimpleMatrix labels) {
+    public SimpleMatrix gradient(Layer out, SimpleMatrix labels) {
         return out.getActivations().minus(labels);
     }
 }

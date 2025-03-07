@@ -104,7 +104,7 @@ public class Layer {
     public SimpleMatrix getGradient() {
         SimpleMatrix gradient = null;
         if (this instanceof Output) {
-            gradient = loss.outputGradient(this, ((Output) this).getLabels());
+            gradient = loss.gradient(this, ((Output) this).getLabels());
             // switch statement for different loss function and activation
             // return gradient of loss wrt output
         } else {
