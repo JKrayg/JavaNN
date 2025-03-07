@@ -9,7 +9,7 @@ import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class Data {
     private SimpleMatrix data;
-    private double[] labels;
+    private SimpleMatrix labels;
     private HashMap<String, Integer> classes;
 
     public Data() {
@@ -37,14 +37,14 @@ public class Data {
         for (int i = 0; i < labels.length; i++) {
             ls[i] = classes.get(labels[i]);
         }
-        this.labels = ls;
+        this.labels = new SimpleMatrix(ls);
     }
 
     public SimpleMatrix getData() {
         return data;
     }
 
-    public double[] getLabels() {
+    public SimpleMatrix getLabels() {
         return labels;
     }
 

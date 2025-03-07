@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.activation;
 
 import org.ejml.simple.SimpleMatrix;
 
+import src.com.JakeKrayger.nn.components.Layer;
+
 public class Softmax extends ActivationFunction {
     // weighted sum for single node ∑(wi⋅xi)+b
     public SimpleMatrix execute(SimpleMatrix z) {
@@ -18,6 +20,15 @@ public class Softmax extends ActivationFunction {
         }
 
         return res;
+    }
+
+    public SimpleMatrix derivative(SimpleMatrix z) {
+        // ***
+        return z;
+    }
+
+    public SimpleMatrix gradient(Layer curr, SimpleMatrix gradientWrtPreAct) {
+        return gradientWrtPreAct.mult(derivative(curr.getPreActivation()));
     }
 
 }

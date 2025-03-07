@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.activation;
 
 import org.ejml.simple.SimpleMatrix;
 
+import src.com.JakeKrayger.nn.components.Layer;
+
 public class Sigmoid extends ActivationFunction {
     public SimpleMatrix execute(SimpleMatrix z) {
         int rows = z.getNumRows();
@@ -11,5 +13,14 @@ public class Sigmoid extends ActivationFunction {
             v[i] = 1 / (1 + Math.exp(-(z.get(i))));
         }
         return new SimpleMatrix(v);
+    }
+
+    public SimpleMatrix derivative(SimpleMatrix z) {
+        // ***
+        return z;
+    }
+
+    public SimpleMatrix gradient(Layer curr, SimpleMatrix gradientWrtPreAct) {
+        return gradientWrtPreAct.mult(derivative(curr.getPreActivation()));
     }
 }

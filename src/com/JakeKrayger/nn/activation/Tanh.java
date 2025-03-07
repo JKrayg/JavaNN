@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.activation;
 
 import org.ejml.simple.SimpleMatrix;
 
+import src.com.JakeKrayger.nn.components.Layer;
+
 public class Tanh extends ActivationFunction {
     public SimpleMatrix execute(SimpleMatrix z) {
         double[] v = new double[z.getNumRows()];
@@ -11,5 +13,14 @@ public class Tanh extends ActivationFunction {
             v[i] = (Math.exp(curr) - Math.exp(-curr)) / (Math.exp(curr) + Math.exp(-curr));
         }
         return new SimpleMatrix(v);
+    }
+
+    public SimpleMatrix derivative(SimpleMatrix z) {
+        // ***
+        return z;
+    }
+
+    public SimpleMatrix gradient(Layer curr, SimpleMatrix gradientWrtPreAct) {
+        return gradientWrtPreAct.mult(derivative(curr.getPreActivation()));
     }
 }

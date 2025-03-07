@@ -1,17 +1,24 @@
 package src.com.JakeKrayger.nn.components;
 
+import java.util.function.BinaryOperator;
+
 import org.ejml.simple.SimpleMatrix;
 import src.com.JakeKrayger.nn.activation.ActivationFunction;
+import src.com.JakeKrayger.nn.activation.Sigmoid;
 import src.com.JakeKrayger.nn.layers.Output;
+import src.com.JakeKrayger.nn.training.loss.BinCrossEntropy;
+import src.com.JakeKrayger.nn.training.loss.Loss;
 
 public class Layer {
     private int numNeurons;
+    private SimpleMatrix preActivation;
     private SimpleMatrix activationsM;
     private SimpleMatrix weightsM;
     private SimpleMatrix biasV;
     private SimpleMatrix gradientWrtWeights;
     private SimpleMatrix gradientWrtBiases;
     private ActivationFunction func;
+    private Loss loss;
     private int inputSize;
 
     // public Layer(int numNeurons, SimpleMatrix b, ActivationFunction func) {
@@ -46,6 +53,10 @@ public class Layer {
         return activationsM;
     }
 
+    public SimpleMatrix getPreActivation() {
+        return preActivation;
+    }
+
     public SimpleMatrix getWeights() {
         return weightsM;
     }
@@ -70,6 +81,14 @@ public class Layer {
         this.biasV = biases;
     }
 
+    public void setPreActivations(SimpleMatrix preAct) {
+        this.preActivation = preAct;
+    }
+
+    public void setActivations(SimpleMatrix activations) {
+        this.activationsM = activations;
+    }
+
     public void setGradientWeights(SimpleMatrix gWrtW) {
         this.gradientWrtWeights = gWrtW;
     }
@@ -78,24 +97,31 @@ public class Layer {
         this.gradientWrtBiases = gWrtB;
     }
 
+    public void setLoss(Loss loss) {
+        this.loss = loss;
+    }
+
     public SimpleMatrix getGradient() {
+        SimpleMatrix gradient = null;
         if (this instanceof Output) {
+            gradient = loss.outputGradient(this, ((Output) this).getLabels());
             // switch statement for different loss function and activation
             // return gradient of loss wrt output
         } else {
+            gradient = func.gradient(this, preActivation);
             // switch statement for different activation
             // return gradient wrt pre-activation
         }
 
-        return new SimpleMatrix(0, 0);
+        return gradient;
     }
 
-    public SimpleMatrix outputGradientWeights(Layer currLayer, Layer prevLayer, double[] labels) {
+    public SimpleMatrix outputGradientWeights(Layer currLayer, Layer prevLayer, SimpleMatrix labels) {
         SimpleMatrix error = outputGradientBias(currLayer, labels);
-        return (prevLayer.getActivations().transpose()).mult(error).divide(labels.length);
+        return (prevLayer.getActivations().transpose()).mult(error).divide(labels.getNumElements());
     }
 
-    public SimpleMatrix outputGradientBias(Layer currLayer, double[] labels) {
+    public SimpleMatrix outputGradientBias(Layer currLayer, SimpleMatrix labels) {
         return currLayer.getActivations().minus(new SimpleMatrix(labels));
     }
 
@@ -106,10 +132,6 @@ public class Layer {
     public void updateBiases(SimpleMatrix gradientWrtBiases, double learningRate) {
         double mean = gradientWrtBiases.elementSum() / gradientWrtBiases.getNumRows();
         this.biasV = this.biasV.minus(mean * learningRate);
-    }
-
-    public void setActivations(SimpleMatrix activations) {
-        this.activationsM = activations;
     }
     
 }

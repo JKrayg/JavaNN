@@ -129,8 +129,8 @@ public class Main {
         System.out.println(data.getClasses());
 
         System.out.println("\nlabels:");
-        for (int i = 0; i < data.getLabels().length; i++) {
-        System.out.println(data.getLabels()[i]);
+        for (int i = 0; i < data.getLabels().getNumElements(); i++) {
+        System.out.println(data.getLabels().get(i));
         }
 
     }

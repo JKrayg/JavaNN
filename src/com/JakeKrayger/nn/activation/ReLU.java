@@ -2,6 +2,8 @@ package src.com.JakeKrayger.nn.activation;
 
 import org.ejml.simple.SimpleMatrix;
 
+import src.com.JakeKrayger.nn.components.Layer;
+
 public class ReLU extends ActivationFunction {
     public SimpleMatrix execute(SimpleMatrix z) {
         int rows = z.getNumRows();
@@ -29,5 +31,9 @@ public class ReLU extends ActivationFunction {
             
         }
         return dz;
+    }
+
+    public SimpleMatrix gradient(Layer curr, SimpleMatrix gradientWrtPreAct) {
+        return gradientWrtPreAct.mult(derivative(curr.getPreActivation()));
     }
 }
