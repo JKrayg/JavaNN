@@ -31,25 +31,30 @@ public class NeuralNet {
 
     public void addLayer(Layer l) {
         ActivationFunction actFunc = l.getActFunc();
+        SimpleMatrix biases = new SimpleMatrix(l.getNumNeurons(), 1);
         if (this.layers != null) {
             Layer prevLayer = this.layers.get(this.layers.size() - 1);
             if (actFunc instanceof ReLU) {
                 l.setWeights(new HeInit().initWeight(prevLayer, l));
+                biases.fill(0.1);
+                l.setBiases(biases);
             } else {
                 l.setWeights(new GlorotInit().initWeight(prevLayer, l));
+                biases.fill(0.0);
+                l.setBiases(biases);
             }
         } else {
             layers = new ArrayList<>();
             if (actFunc instanceof ReLU) {
                 l.setWeights(new SimpleMatrix(new HeInit().initWeight(l.getInputSize(), l)));
+                biases.fill(0.1);
+                l.setBiases(biases);
             } else {
                 l.setWeights(new SimpleMatrix(new GlorotInit().initWeight(l.getInputSize(), l)));
+                biases.fill(0.0);
+                l.setBiases(biases);
             }
         }
-        
-        SimpleMatrix biases = new SimpleMatrix(l.getNumNeurons(), 1);
-        biases.fill(0.01);
-        l.setBiases(biases);
 
 
         this.layers.add(l);
@@ -92,6 +97,7 @@ public class NeuralNet {
             SimpleMatrix z = maths.weightedSum(prev, curr);
             SimpleMatrix currAct = curr.getActFunc().execute(z);
             System.out.println("L" + (i + 1) + " activation matrix after " + curr.getActFunc().getClass().getSimpleName() + " function: \n" + currAct);
+            // System.out.println("L" + (i + 1) + " weighted sums (zL" + (i + 1) + "):\n" + z);
             curr.setPreActivations(z);
             curr.setActivations(currAct);
 
@@ -100,17 +106,68 @@ public class NeuralNet {
             }
         }
 
-        getGradients(layers.get(layers.size() - 1));
+        Output outLayer = (Output) layers.get(layers.size() - 1);
+        SimpleMatrix gradientWrtOutput = outLayer.getLoss().gradient(outLayer, outLayer.getLabels());
+        getGradients(outLayer, gradientWrtOutput);
     }
 
-    public void getGradients(Layer currLayer) {
+    public void getGradients(Layer currLayer, SimpleMatrix gradient) {
         // get gradient of loss wrt to output
         // use to get gradient wrt weights/biases of current layer <----|
         // use to get gradient wrt to previous layers activation        |
         //      and pass this to next layer                             |
         // repeat ------------------------------------------------------|
-        System.out.println("gradient of loss wrt output:");
-        System.out.println(currLayer.getGradient());
+
+        // System.out.println("gwrtO:");
+        // System.out.println(gradient);
+
+        // System.out.println("curr weights mult:");
+        // System.out.println(gradient.mult(currLayer.getWeights().transpose()));
+
+        Layer curr = currLayer;
+        Layer prev = layers.get(layers.indexOf(curr) - 1);
+
+        if (currLayer instanceof Output) {
+            Output out = (Output) curr;
+            SimpleMatrix gradientWrtWeights = out.gradientWeights(prev, gradient);
+            SimpleMatrix gradientWrtBias = out.gradientBias(curr);
+            curr.setGradientWeights(gradientWrtWeights);
+            curr.setGradientBiases(gradientWrtBias);
+        } else {
+            SimpleMatrix gradientWrtWeights = currLayer.gradientWeights(prev, gradient);
+            SimpleMatrix gradientWrtBias = currLayer.gradientBias(gradient);
+            curr.setGradientWeights(gradientWrtWeights);
+            curr.setGradientBiases(gradientWrtBias);
+        }
+
+        // System.out.println("gradient wrt Output:");
+        // System.out.println(gradient);
+
+        // System.out.println("output weights transposed:");
+        // System.out.println(currLayer.getWeights().transpose());
+
+        // System.out.println("gradient wrt output dot output weights transposed:");
+        // System.out.println(gradient.mult(currLayer.getWeights().transpose()));
+        
+
+
+                        // if (layers.get(layers.indexOf(curr) - 1) != null) {
+                        //     System.out.println("gradient:");
+                        //     System.out.println(gradient);
+                        //     System.out.println("currLayer.getWeights().transpose()");
+                        //     System.out.println(currLayer.getWeights().transpose());
+                        //     System.out.println("gradient wrt output dot output weights transposed:");
+                        //     System.out.println(gradient.mult(currLayer.getWeights().transpose()));
+
+                        //     SimpleMatrix s = prev.getActFunc().gradient(prev, gradient.mult(currLayer.getWeights().transpose()));
+                        //     System.out.println("S:");
+                        //     System.out.println(s);
+                        //     getGradients(prev, s);
+                        // }
+
+
+        // System.out.println("gradient of loss wrt output:");
+        // System.out.println(currLayer.getGradient());
         // Layer curr = currLayer;
         // Layer prev = layers.get(layers.indexOf(curr) - 1);
 

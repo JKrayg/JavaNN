@@ -50,6 +50,7 @@ public class Data {
 
         this.labels = new SimpleMatrix(ls);
 
+        // gotta be a better way
         ArrayList<double[]> allData = new ArrayList<>();
         ArrayList<Double> allLabels = new ArrayList<>();
         int numOfTest = (int) Math.floor(labels.length * testSize);

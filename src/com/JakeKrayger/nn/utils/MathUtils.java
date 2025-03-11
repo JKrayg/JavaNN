@@ -15,7 +15,7 @@ public class MathUtils {
 
     private static SimpleMatrix getWeightedSum(SimpleMatrix prev, Layer curr) {
         SimpleMatrix weights = curr.getWeights();
-        SimpleMatrix biasT = curr.getBias().transpose();
+        SimpleMatrix biasT = curr.getBias();
         SimpleMatrix dot = prev.mult(weights);
         int rows = dot.getNumRows();
         int cols = dot.getNumCols();

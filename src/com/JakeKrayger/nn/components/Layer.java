@@ -21,23 +21,10 @@ public class Layer {
     private Loss loss;
     private int inputSize;
 
-    // public Layer(int numNeurons, SimpleMatrix b, ActivationFunction func) {
-    //     this.numNeurons = numNeurons;
-    //     this.biasV = b;
-    //     this.func = func;
-    // }
-
     public Layer(int numNeurons, ActivationFunction func) {
         this.numNeurons = numNeurons;
         this.func = func;
     }
-
-    // public Layer(int numNeurons, SimpleMatrix b, ActivationFunction func, int inputSize) {
-    //     this.numNeurons = numNeurons;
-    //     this.biasV = b;
-    //     this.func = func;
-    //     this.inputSize = inputSize;
-    // }
 
     public Layer(int numNeurons, ActivationFunction func, int inputSize) {
         this.numNeurons = numNeurons;
@@ -71,6 +58,10 @@ public class Layer {
 
     public int getInputSize() {
         return inputSize;
+    }
+
+    public Loss getLoss() {
+        return loss;
     }
 
     public void setWeights(SimpleMatrix weights) {
@@ -116,13 +107,18 @@ public class Layer {
         return gradient;
     }
 
-    public SimpleMatrix outputGradientWeights(Layer currLayer, Layer prevLayer, SimpleMatrix labels) {
-        SimpleMatrix error = outputGradientBias(currLayer, labels);
-        return (prevLayer.getActivations().transpose()).mult(error).divide(labels.getNumElements());
+    public SimpleMatrix gradientWeights(Layer prevLayer, SimpleMatrix gradient) {
+        SimpleMatrix gWrtW = prevLayer.getActivations().transpose().mult(gradient).divide(prevLayer.getActivations().getNumRows());
+        return gWrtW;
     }
 
-    public SimpleMatrix outputGradientBias(Layer currLayer, SimpleMatrix labels) {
-        return currLayer.getActivations().minus(new SimpleMatrix(labels));
+    public SimpleMatrix gradientBias(SimpleMatrix gradient) {
+        double[] biasG = new double[gradient.getNumCols()];
+        for (int i = 0; i < gradient.getNumCols(); i++) {
+            SimpleMatrix col = gradient.extractVector(false, i);
+            biasG[i] = col.elementSum() / this.getActivations().getNumRows();
+        }
+        return new SimpleMatrix(biasG);
     }
 
     public void updateWeights(SimpleMatrix gradientWrtWeights, double learningRate) {

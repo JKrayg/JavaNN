@@ -18,4 +18,18 @@ public class Output extends Layer {
     public SimpleMatrix getLabels() {
         return labels;
     }
+
+    public SimpleMatrix gradientWeights(Layer prevLayer, SimpleMatrix gradientWrtOutput) {
+        return (prevLayer.getActivations().transpose()).mult(gradientWrtOutput).divide(labels.getNumElements());
+    }
+
+    public SimpleMatrix gradientBias(Layer currLayer) {
+        SimpleMatrix gradientWrtOutput = currLayer.getLoss().gradient(currLayer, labels);
+        double[] biasG = new double[currLayer.getNumNeurons()];
+        for (int i = 0; i < gradientWrtOutput.getNumCols(); i++) {
+            SimpleMatrix col = gradientWrtOutput.extractVector(false, i);
+            biasG[i] = col.elementSum() / labels.getNumElements();
+        }
+        return new SimpleMatrix(biasG);
+    }
 }
