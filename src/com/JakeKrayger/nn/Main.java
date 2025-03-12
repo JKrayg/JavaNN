@@ -58,10 +58,10 @@ public class Main {
 
         cols = dta.get(0).length;
 
-        String[] labs = new String[10];
-        double[][] dats = new double[10][cols];
+        String[] labs = new String[30];
+        double[][] dats = new double[30][cols];
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 30; i++) {
             Random rand = new Random();
             int r = rand.nextInt(rows);
             dats[i] = dta.get(r);
@@ -77,27 +77,27 @@ public class Main {
         // double[] sample3 = new double[]{3, 8, 13};
         // double[] sample4 = new double[]{4, 9, 14};
         // double[] sample5 = new double[]{5, 10, 15};
-        // double[] sample1 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        // double[] sample2 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        // double[] sample3 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        // double[] sample4 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
-        // double[] sample5 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // // double[] sample1 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // // double[] sample2 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // // double[] sample3 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // // double[] sample4 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
+        // // double[] sample5 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
         // double[][] sampleData = new double[][]{sample1, sample2, sample3, sample4, sample5};
         // String[] labels = {"T", "F", "T", "T", "F"};
         // Data data = new Data(sampleData, labels, 0.4);
         // data.zScoreNormalization();
 
-        System.out.println("train data:");
-        System.out.println(data.getTrainData());
+        // System.out.println("train data:");
+        // System.out.println(data.getTrainData());
 
-        System.out.println("train labels:");
-        System.out.println(data.getTrainLabels());
+        // System.out.println("train labels:");
+        // System.out.println(data.getTrainLabels());
 
         System.out.println("test data:");
-        System.out.println(data.getTestData());
+        System.out.println(data.getData());
 
         System.out.println("test labels:");
-        System.out.println(data.getTestLabels());
+        System.out.println(data.getLabels());
 
 
 
@@ -108,16 +108,21 @@ public class Main {
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-        nn.compile(data, new Adam(), new BinCrossEntropy());
-        nn.singlePass();
-
-        System.out.println("\nclasses:");
-        System.out.println(data.getClasses());
-
-        System.out.println("\nlabels:");
-        for (int i = 0; i < data.getLabels().getNumElements(); i++) {
-            System.out.println(data.getLabels().get(i));
+        nn.compile(data, new Adam(), new BinCrossEntropy(), 0.03);
+        // nn.singlePass();
+        for (int i = 0; i < 50; i++) {
+            nn.singlePass();
+            // double loss = computeLoss(X, y);
+            // System.out.println("Epoch " + i + ", Loss: " + loss);
         }
+
+        // System.out.println("\nclasses:");
+        // System.out.println(data.getClasses());
+
+        // System.out.println("\nlabels:");
+        // for (int i = 0; i < data.getLabels().getNumElements(); i++) {
+        //     System.out.println(data.getLabels().get(i));
+        // }
 
     }
 }

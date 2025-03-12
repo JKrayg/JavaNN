@@ -13,13 +13,15 @@ public class Layer {
     private int numNeurons;
     private SimpleMatrix preActivation;
     private SimpleMatrix activationsM;
-    private SimpleMatrix weightsM;
-    private SimpleMatrix biasV;
+    private SimpleMatrix weights;
+    private SimpleMatrix bias;
     private SimpleMatrix gradientWrtWeights;
     private SimpleMatrix gradientWrtBiases;
     private ActivationFunction func;
     private Loss loss;
     private int inputSize;
+
+    public Layer() {}
 
     public Layer(int numNeurons, ActivationFunction func) {
         this.numNeurons = numNeurons;
@@ -45,11 +47,11 @@ public class Layer {
     }
 
     public SimpleMatrix getWeights() {
-        return weightsM;
+        return weights;
     }
 
     public SimpleMatrix getBias() {
-        return biasV;
+        return bias;
     }
 
     public ActivationFunction getActFunc() {
@@ -64,12 +66,20 @@ public class Layer {
         return loss;
     }
 
+    public SimpleMatrix getGradientWeights() {
+        return gradientWrtWeights;
+    }
+
+    public SimpleMatrix getGradientBias() {
+        return gradientWrtBiases;
+    }
+
     public void setWeights(SimpleMatrix weights) {
-        this.weightsM = weights;
+        this.weights = weights;
     }
 
     public void setBiases(SimpleMatrix biases) {
-        this.biasV = biases;
+        this.bias = biases;
     }
 
     public void setPreActivations(SimpleMatrix preAct) {
@@ -96,12 +106,8 @@ public class Layer {
         SimpleMatrix gradient = null;
         if (this instanceof Output) {
             gradient = loss.gradient(this, ((Output) this).getLabels());
-            // switch statement for different loss function and activation
-            // return gradient of loss wrt output
         } else {
             gradient = func.gradient(this, preActivation);
-            // switch statement for different activation
-            // return gradient wrt pre-activation
         }
 
         return gradient;
@@ -116,18 +122,19 @@ public class Layer {
         double[] biasG = new double[gradient.getNumCols()];
         for (int i = 0; i < gradient.getNumCols(); i++) {
             SimpleMatrix col = gradient.extractVector(false, i);
-            biasG[i] = col.elementSum() / this.getActivations().getNumRows();
+            biasG[i] = col.elementSum() / gradient.getNumRows();
         }
         return new SimpleMatrix(biasG);
     }
 
     public void updateWeights(SimpleMatrix gradientWrtWeights, double learningRate) {
-        this.weightsM = this.weightsM.minus(gradientWrtWeights.scale(learningRate));
+        this.weights = this.weights.minus(gradientWrtWeights.scale(learningRate));
     }
 
     public void updateBiases(SimpleMatrix gradientWrtBiases, double learningRate) {
-        double mean = gradientWrtBiases.elementSum() / gradientWrtBiases.getNumRows();
-        this.biasV = this.biasV.minus(mean * learningRate);
+        // double mean = gradientWrtBiases.elementSum() / gradientWrtBiases.getNumRows();
+        // this.biasV = this.biasV.minus(mean * learningRate);
+        this.bias = this.bias.minus(gradientWrtBiases.scale(learningRate));
     }
     
 }

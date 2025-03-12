@@ -23,8 +23,7 @@ public class Output extends Layer {
         return (prevLayer.getActivations().transpose()).mult(gradientWrtOutput).divide(labels.getNumElements());
     }
 
-    public SimpleMatrix gradientBias(Layer currLayer) {
-        SimpleMatrix gradientWrtOutput = currLayer.getLoss().gradient(currLayer, labels);
+    public SimpleMatrix gradientBias(Layer currLayer, SimpleMatrix gradientWrtOutput) {
         double[] biasG = new double[currLayer.getNumNeurons()];
         for (int i = 0; i < gradientWrtOutput.getNumCols(); i++) {
             SimpleMatrix col = gradientWrtOutput.extractVector(false, i);

@@ -34,8 +34,8 @@ public class ReLU extends ActivationFunction {
     }
 
     public SimpleMatrix gradient(Layer prev, SimpleMatrix gradientWrtPreAct) {
-        System.out.println(derivative(prev.getPreActivation()));
-        System.out.println(gradientWrtPreAct);
-        return derivative(prev.getPreActivation()).mult(gradientWrtPreAct.transpose());
+        // System.out.println("derivative wrt previous preactivation:");
+        // System.out.println(derivative(prev.getPreActivation()));
+        return derivative(prev.getPreActivation()).elementMult(gradientWrtPreAct);
     }
 }
