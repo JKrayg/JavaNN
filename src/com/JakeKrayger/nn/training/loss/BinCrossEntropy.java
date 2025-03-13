@@ -12,7 +12,9 @@ public class BinCrossEntropy extends Loss {
         for (int i = 0; i < n; i++) {
             double pred = activations.get(i);
             double y = labels.get(i);
+            double epsilon = 1e-8;
             // need to prevent log(0)
+            pred = Math.max(epsilon, Math.min(1 - epsilon, pred));
             sumLoss += -(y * Math.log(pred) + (1 - y) * Math.log(1 - pred));
         }
         return sumLoss / n;
