@@ -18,19 +18,11 @@ public class NeuralNet {
     private Optimizer optimizer;
     private Loss lossFunc;
     private double loss;
-    private int batchSize;
-    private Data singleBatch;
-    private Data training;
-    private Data testing;
     private double learningRate;
     private MathUtils maths = new MathUtils();
 
     public ArrayList<Layer> getLayers() {
         return layers;
-    }
-
-    public void setBatchSize(int batchSize) {
-        this.batchSize = batchSize;
     }
 
     public void addLayer(Layer l) {
@@ -78,7 +70,7 @@ public class NeuralNet {
 
 
 
-    public void batchFit(SimpleMatrix train, SimpleMatrix test, int batchSize, int epochs) {
+    public void miniBatchFit(SimpleMatrix train, SimpleMatrix test, int batchSize, int epochs) {
         // shuffle data and get new batches of size batchSize for each epoch
         for (int i = 0; i < epochs; i++) {
             ArrayList<SimpleMatrix> shuffled = new ArrayList<>();
@@ -101,7 +93,7 @@ public class NeuralNet {
                 batchesLabels.add(currBatch.extractVector(false, train.getNumCols() - 1));
             }
 
-            // // do below for each batch
+            // do below for each batch
             for (int v = 0; v < batchesData.size(); v++) {
                 forwardPass(batchesData.get(v), batchesLabels.get(v));
                 backprop(batchesData.get(v), batchesLabels.get(v));
@@ -113,20 +105,37 @@ public class NeuralNet {
             SimpleMatrix labels = train.extractVector(false, train.getNumCols() - 1);
 
             forwardPass(data, labels);
-            System.out.println("LOSS: " + loss);
+            // System.out.println("LOSS: " + loss);
         }
+        double[] lab = new double[1];
+        lab[0] = test.get(3, test.getNumCols() - 1);
+
+        SimpleMatrix testData = test.extractMatrix(0, test.getNumRows(), 0, test.getNumCols() - 1);
+        SimpleMatrix testLabels = test.extractVector(false, test.getNumCols() - 1);
+
+        // test
+        forwardPass(testData, testLabels);
+        Output outLayer = (Output) layers.get(layers.size() - 1);
+        System.out.println("Prediction          : True Value");
+        for (int h = 0; h < testData.getNumRows(); h++) {
+            System.out.print(outLayer.getActivations().get(h));
+            System.out.print(" : " + testLabels.get(h));
+            System.out.println();
+        }
+        
+        
     }
 
 
 
-    public void fullFit(SimpleMatrix trainData, int epochs) {
+    public void batchFit(SimpleMatrix trainData, int epochs) {
         for (int i = 0; i < epochs; i++) {
-            SimpleMatrix dat = trainData.extractMatrix(0, trainData.getNumRows(), 0, trainData.getNumCols() - 1);
-            SimpleMatrix labs = trainData.extractVector(false, trainData.getNumCols() - 1);
+            SimpleMatrix data = trainData.extractMatrix(0, trainData.getNumRows(), 0, trainData.getNumCols() - 1);
+            SimpleMatrix labels = trainData.extractVector(false, trainData.getNumCols() - 1);
 
-            forwardPass(dat, labs);
+            forwardPass(data, labels);
             System.out.println("LOSS: " + loss);
-            backprop(dat, labs);
+            backprop(data, labels);
         }
     }
 
@@ -161,7 +170,6 @@ public class NeuralNet {
     public void backprop(SimpleMatrix data, SimpleMatrix labels) {
         Output outLayer = (Output) layers.get(layers.size() - 1);
         SimpleMatrix gradientWrtOutput = outLayer.getLoss().gradient(outLayer, outLayer.getLabels());
-        this.loss = outLayer.getLoss().execute(outLayer.getActivations(), labels);
         getGradients(outLayer, gradientWrtOutput, data);
 
         for (Layer l : layers) {

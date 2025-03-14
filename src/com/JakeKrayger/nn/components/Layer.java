@@ -132,8 +132,6 @@ public class Layer {
     }
 
     public void updateBiases(SimpleMatrix gradientWrtBiases, double learningRate) {
-        // double mean = gradientWrtBiases.elementSum() / gradientWrtBiases.getNumRows();
-        // this.biasV = this.biasV.minus(mean * learningRate);
         this.bias = this.bias.minus(gradientWrtBiases.scale(learningRate));
     }
     

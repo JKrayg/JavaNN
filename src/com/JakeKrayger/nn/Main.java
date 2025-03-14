@@ -19,7 +19,8 @@ import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class Main {
     public static void main(String[] args) {
-        String filePath = "src\\resources\\datasets\\wdbc.data";
+        // String filePath = "src\\resources\\datasets\\wdbc.data";
+        String filePath = "src\\resources\\datasets\\iris.data";
         ArrayList<double[]> dataArrayList = new ArrayList<>();
         ArrayList<String> labelsArrayList = new ArrayList<>();
 
@@ -27,12 +28,10 @@ public class Main {
             File f = new File(filePath);
             Scanner scan = new Scanner(f);
             while (scan.hasNextLine()) {
+                // ** iris data **
                 String line = scan.nextLine();
-                String[] splitLine = line.split(",", 3);
-                String label = splitLine[1];
-                labelsArrayList.add(label);
+                String values = line.substring(0, line.lastIndexOf(","));
                 double[] toDub;
-                String values = splitLine[2];
                 String[] splitValues = values.split(",");
                 toDub = new double[splitValues.length];
 
@@ -41,6 +40,25 @@ public class Main {
                 }
 
                 dataArrayList.add(toDub);
+                String label = line.substring(line.lastIndexOf(",") + 1);
+                labelsArrayList.add(label);
+
+
+                // ** wdbc data **
+                // String line = scan.nextLine();
+                // String[] splitLine = line.split(",", 3);
+                // String label = splitLine[1];
+                // labelsArrayList.add(label);
+                // double[] toDub;
+                // String values = splitLine[2];
+                // String[] splitValues = values.split(",");
+                // toDub = new double[splitValues.length];
+
+                // for (int i = 0; i < splitValues.length; i++) {
+                //     toDub[i] = Double.parseDouble(splitValues[i]);
+                // }
+
+                // dataArrayList.add(toDub);
             }
 
             scan.close();
@@ -52,32 +70,21 @@ public class Main {
         double[][] data_ = dataArrayList.toArray(new double[0][]);
         String[] labels = labelsArrayList.toArray(new String[0]);
 
-        // double[][] testerData = new double[60][];
-        // String[] testerLabels = new String[60];
-        // Random rand = new Random();
+        double[][] testerData = new double[30][];
+        String[] testerLabels = new String[30];
+        Random rand = new Random();
 
-        // for (int i = 0; i < 60; i++) {
-        //     int r = rand.nextInt(0, labels.length);
-        //     testerData[i] = data_[r].clone();
-        //     testerLabels[i] = labels[r];
-        // }
+        for (int i = 0; i < 30; i++) {
+            int r = rand.nextInt(0, labels.length);
+            testerData[i] = data_[r].clone();
+            testerLabels[i] = labels[r];
+        }
 
-        Data data = new Data(data_, labels);
+        Data data = new Data(testerData, testerLabels);
+
+        // Data data = new Data(data_, labels);
         data.zScoreNormalization();
         data.split(0.2);
-
-        // for (int i = 0; i < 3; i++) {
-        //     System.out.println(data.getTestData().getRow(i));
-        //     System.out.println(data.getTrainData().getRow(i));
-        //     System.out.println("==================================");
-        // }
-
-        // for (int k = 0; k < 10; k++) {
-        //     // SimpleMatrix currBatch = new SimpleMatrix(0, 0);
-        //     for (int p = k * 12; p < k * 12 + 12; p++) {
-        //         System.out.println(p);
-        //     }
-        // }
 
         // Random random = new Random();
         // double[] sample1 = new double[]{1, 6, 11};
@@ -101,17 +108,27 @@ public class Main {
         //  |    |   \____/     V    V       ?
 
         NeuralNet nn = new NeuralNet();
-        Dense d1 = new Dense(16, new ReLU(), 30);
+        Dense d1 = new Dense(16, new ReLU(), 4);
         Dense d2 = new Dense(8, new ReLU());
-        Dense d3 = new Dense(8, new ReLU());
-        Output d4 = new Output(1, new Sigmoid());
+        Output d3 = new Output(data.getClasses().size(), new Sigmoid());
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-        nn.addLayer(d4);
-        nn.compile(new Adam(), new BinCrossEntropy(), 0.03);
-        // nn.batchFit(data.getTrainData(), data.getTestData(), 64, 75);
-        nn.fullFit(data.getTrainData(), 75);
+        nn.compile(new Adam(), new CatCrossEntropy(), 0.03);
+        nn.forwardPass(data.getData(), data.getLabels());
+
+        for (Layer l: nn.getLayers()) {
+            System.out.println(l.getClass().getSimpleName() + " - Activation Function: " + l.getActFunc().getClass().getSimpleName());
+            System.out.println("activation matrix:");
+            System.out.println(l.getActivations());
+            System.out.println("weights:");
+            System.out.println(l.getWeights());
+            System.out.println("biases:");
+            System.out.println(l.getBias());
+        }
+
+        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), 32, 75);
+        // nn.batchFit(data.getTrainData(), 75);
 
     }
 }
