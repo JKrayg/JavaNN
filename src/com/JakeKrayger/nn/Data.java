@@ -42,7 +42,25 @@ public class Data {
             ls[i] = classes.get(labels[i]);
         }
 
-        this.labels = new SimpleMatrix(ls);
+        if (classes.size() > 2) {
+            // this.labels = new SimpleMatrix(ls);
+            this.labels = oneHot(new SimpleMatrix(ls));
+        } else {
+            this.labels = new SimpleMatrix(ls);
+        }
+
+        
+    }
+
+    public SimpleMatrix oneHot(SimpleMatrix labels) {
+        SimpleMatrix encoded = new SimpleMatrix(labels.getNumRows(), classes.size());
+        for (int i = 0; i < labels.getNumRows(); i++) {
+            SimpleMatrix curr = new SimpleMatrix(1, classes.size());
+            curr.set((int)labels.get(i), 1.0);
+            encoded.setRow(i, curr);
+        }
+
+        return encoded;
     }
 
     public SimpleMatrix getData() {
@@ -57,17 +75,9 @@ public class Data {
         return test;
     }
 
-    // public SimpleMatrix getTestLabels() {
-    //     return testLabels;
-    // }
-
     public SimpleMatrix getTrainData() {
         return train;
     }
-
-    // public SimpleMatrix getTrainLabels() {
-    //     return trainLabels;
-    // }
 
     public HashMap<String, Integer> getClasses() {
         return classes;
@@ -92,15 +102,13 @@ public class Data {
 
     public void split(double testSize) {
         // gotta be a better way
-        // ArrayList<SimpleMatrix> allData = new ArrayList<>();
-        // ArrayList<Double> allLabels = new ArrayList<>();
-        int rows = labels.getNumElements();
+        int rows = data.getNumRows();
         int cols = data.getNumCols();
         int numOfTest = (int) Math.floor(rows * testSize);
         double[][] testD = new double[numOfTest][cols];
-        double[] testL = new double[numOfTest];
         double[][] trainD = new double[rows - numOfTest][cols];
-        double[] trainL = new double[rows - numOfTest];
+        double[][] testL = new double[numOfTest][classes.size() > 2 ? classes.size() : 0];
+        double[][] trainL = new double[rows - numOfTest][classes.size() > 2 ? classes.size() : 0];
         Random rand = new Random();
         Set<Integer> used = new HashSet<>();
 
@@ -111,16 +119,16 @@ public class Data {
             }
             used.add(newRand);
             testD[j] = data.extractVector(true, newRand).toArray2()[0];
-            testL[j] = labels.get(newRand);
+            testL[j] = labels.getRow(newRand).toArray2()[0];
         }
 
         ArrayList<double[]> trainDList = new ArrayList<>();
-        ArrayList<Double> trainLList = new ArrayList<>();
+        ArrayList<double[]> trainLList = new ArrayList<>();
 
         for (int p = 0; p < rows; p++) {
             if (!used.contains(p)) {
                 trainDList.add(data.getRow(p).toArray2()[0]);
-                trainLList.add(labels.get(p));
+                trainLList.add(labels.getRow(p).toArray2()[0]);
             }
         }
 

@@ -8,13 +8,18 @@ import src.com.JakeKrayger.nn.activation.Sigmoid;
 import src.com.JakeKrayger.nn.layers.Output;
 import src.com.JakeKrayger.nn.training.loss.BinCrossEntropy;
 import src.com.JakeKrayger.nn.training.loss.Loss;
+import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
 
 public class Layer {
     private int numNeurons;
     private SimpleMatrix preActivation;
-    private SimpleMatrix activationsM;
+    private SimpleMatrix activations;
     private SimpleMatrix weights;
+    private SimpleMatrix weightsMomentum;
+    private SimpleMatrix weightsVariance;
     private SimpleMatrix bias;
+    private SimpleMatrix biasMomentum;
+    private SimpleMatrix biasVariance;
     private SimpleMatrix gradientWrtWeights;
     private SimpleMatrix gradientWrtBiases;
     private ActivationFunction func;
@@ -34,12 +39,56 @@ public class Layer {
         this.inputSize = inputSize;
     }
 
+    public void setWeights(SimpleMatrix weights) {
+        this.weights = weights;
+    }
+
+    public void setBiases(SimpleMatrix biases) {
+        this.bias = biases;
+    }
+
+    public void setWeightsMomentum(SimpleMatrix m) {
+        this.weightsMomentum = m;
+    }
+
+    public void setBiasesMomentum(SimpleMatrix m) {
+        this.biasMomentum = m;
+    }
+
+    public void setWeightsVariance(SimpleMatrix v) {
+        this.weightsVariance = v;
+    }
+
+    public void setBiasesVariance(SimpleMatrix v) {
+        this.biasVariance = v;
+    }
+
+    public void setPreActivations(SimpleMatrix preAct) {
+        this.preActivation = preAct;
+    }
+
+    public void setActivations(SimpleMatrix activations) {
+        this.activations = activations;
+    }
+
+    public void setGradientWeights(SimpleMatrix gWrtW) {
+        this.gradientWrtWeights = gWrtW;
+    }
+
+    public void setGradientBiases(SimpleMatrix gWrtB) {
+        this.gradientWrtBiases = gWrtB;
+    }
+
+    public void setLoss(Loss loss) {
+        this.loss = loss;
+    }
+
     public int getNumNeurons() {
         return numNeurons;
     }
 
     public SimpleMatrix getActivations() {
-        return activationsM;
+        return activations;
     }
 
     public SimpleMatrix getPreActivation() {
@@ -52,6 +101,22 @@ public class Layer {
 
     public SimpleMatrix getBias() {
         return bias;
+    }
+
+    public SimpleMatrix getWeightsMomentum() {
+        return weightsMomentum;
+    }
+
+    public SimpleMatrix getWeightsVariance() {
+        return weightsVariance;
+    }
+
+    public SimpleMatrix getBiasMomentum() {
+        return biasMomentum;
+    }
+
+    public SimpleMatrix getBiasVariance() {
+        return biasVariance;
     }
 
     public ActivationFunction getActFunc() {
@@ -72,34 +137,6 @@ public class Layer {
 
     public SimpleMatrix getGradientBias() {
         return gradientWrtBiases;
-    }
-
-    public void setWeights(SimpleMatrix weights) {
-        this.weights = weights;
-    }
-
-    public void setBiases(SimpleMatrix biases) {
-        this.bias = biases;
-    }
-
-    public void setPreActivations(SimpleMatrix preAct) {
-        this.preActivation = preAct;
-    }
-
-    public void setActivations(SimpleMatrix activations) {
-        this.activationsM = activations;
-    }
-
-    public void setGradientWeights(SimpleMatrix gWrtW) {
-        this.gradientWrtWeights = gWrtW;
-    }
-
-    public void setGradientBiases(SimpleMatrix gWrtB) {
-        this.gradientWrtBiases = gWrtB;
-    }
-
-    public void setLoss(Loss loss) {
-        this.loss = loss;
     }
 
     public SimpleMatrix getGradient() {
@@ -127,12 +164,12 @@ public class Layer {
         return new SimpleMatrix(biasG);
     }
 
-    public void updateWeights(SimpleMatrix gradientWrtWeights, double learningRate) {
-        this.weights = this.weights.minus(gradientWrtWeights.scale(learningRate));
+    public void updateWeights(SimpleMatrix gradientWrtWeights, Optimizer o) {
+        this.weights = o.executeWeightsUpdate(this);
     }
 
-    public void updateBiases(SimpleMatrix gradientWrtBiases, double learningRate) {
-        this.bias = this.bias.minus(gradientWrtBiases.scale(learningRate));
+    public void updateBiases(SimpleMatrix gradientWrtBiases, Optimizer o) {
+        this.weights = o.executeWeightsUpdate(this);
     }
     
 }

@@ -57,17 +57,26 @@ public class NeuralNet {
     }
 
 
-
-    public void compile(Optimizer o, Loss l, double learningRate) {
+    public void compile(Optimizer o, Loss l) {
         this.optimizer = o;
         this.lossFunc = l;
-        this.learningRate = learningRate;
+        this.learningRate = o.getLearningRate();
 
         for (Layer lyr : layers) {
-            lyr.setLoss(l);
+            if (lyr instanceof Output) {
+                lyr.setLoss(l);
+            }
+            
+            if (optimizer instanceof Adam) {
+                SimpleMatrix weightsO = new SimpleMatrix(lyr.getWeights().getNumRows(), lyr.getWeights().getNumCols());
+                SimpleMatrix biasO = new SimpleMatrix(lyr.getBias().getNumRows(), lyr.getBias().getNumCols());
+                lyr.setWeightsMomentum(weightsO);
+                lyr.setWeightsVariance(weightsO);
+                lyr.setBiasesMomentum(biasO);
+                lyr.setBiasesVariance(biasO);
+            }
         }
     }
-
 
 
     public void miniBatchFit(SimpleMatrix train, SimpleMatrix test, int batchSize, int epochs) {
@@ -81,7 +90,7 @@ public class NeuralNet {
             }
             Collections.shuffle(shuffled);
 
-            // need to handle last batch
+
             for (int k = 0; k < shuffled.size() / batchSize; k++) {
                 SimpleMatrix currBatch = new SimpleMatrix(batchSize, train.getNumCols());
                 int count = 0;
@@ -93,6 +102,20 @@ public class NeuralNet {
                 batchesLabels.add(currBatch.extractVector(false, train.getNumCols() - 1));
             }
 
+            // last batch - find a better way
+            if (shuffled.size() % batchSize > 0) {
+                SimpleMatrix lastBatch = new SimpleMatrix(shuffled.size() % batchSize, train.getNumCols());
+                int count = 0;
+                for (int m = batchSize * (shuffled.size() / batchSize); m < shuffled.size(); m++) {
+                    lastBatch.setRow(count, shuffled.get(m));
+                    count += 1;
+                }
+                batchesData.add(lastBatch.extractMatrix(0, shuffled.size() % batchSize, 0, train.getNumCols() - 1));
+                batchesLabels.add(lastBatch.extractVector(false, train.getNumCols() - 1));
+            }
+            
+
+
             // do below for each batch
             for (int v = 0; v < batchesData.size(); v++) {
                 forwardPass(batchesData.get(v), batchesLabels.get(v));
@@ -100,23 +123,22 @@ public class NeuralNet {
             }
 
             // get loss
-
             SimpleMatrix data = train.extractMatrix(0, train.getNumRows(), 0, train.getNumCols() - 1);
             SimpleMatrix labels = train.extractVector(false, train.getNumCols() - 1);
 
             forwardPass(data, labels);
             // System.out.println("LOSS: " + loss);
         }
-        double[] lab = new double[1];
-        lab[0] = test.get(3, test.getNumCols() - 1);
 
+        
+
+        // test
         SimpleMatrix testData = test.extractMatrix(0, test.getNumRows(), 0, test.getNumCols() - 1);
         SimpleMatrix testLabels = test.extractVector(false, test.getNumCols() - 1);
 
-        // test
         forwardPass(testData, testLabels);
         Output outLayer = (Output) layers.get(layers.size() - 1);
-        System.out.println("Prediction          : True Value");
+        System.out.println("Prediction : True Value");
         for (int h = 0; h < testData.getNumRows(); h++) {
             System.out.print(outLayer.getActivations().get(h));
             System.out.print(" : " + testLabels.get(h));
@@ -136,6 +158,11 @@ public class NeuralNet {
             forwardPass(data, labels);
             System.out.println("LOSS: " + loss);
             backprop(data, labels);
+            
+            if (optimizer instanceof Adam) {
+                ((Adam) optimizer).updateCount();
+            }
+            
         }
     }
 
@@ -173,8 +200,8 @@ public class NeuralNet {
         getGradients(outLayer, gradientWrtOutput, data);
 
         for (Layer l : layers) {
-            l.updateWeights(l.getGradientWeights(), learningRate);
-            l.updateBiases(l.getGradientBias(), learningRate);
+            l.updateWeights(l.getGradientWeights(), optimizer);
+            l.updateBiases(l.getGradientBias(), optimizer);
         }
     }
 
