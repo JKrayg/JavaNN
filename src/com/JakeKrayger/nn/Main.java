@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+import org.ejml.simple.SimpleMatrix;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -67,11 +68,11 @@ public class Main {
         double[][] data_ = dataArrayList.toArray(new double[0][]);
         String[] labels = labelsArrayList.toArray(new String[0]);
 
-        double[][] testerData = new double[20][];
-        String[] testerLabels = new String[20];
+        double[][] testerData = new double[50][];
+        String[] testerLabels = new String[50];
         Random rand = new Random();
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 50; i++) {
             int r = rand.nextInt(0, labels.length);
             testerData[i] = data_[r].clone();
             testerLabels[i] = labels[r];
@@ -80,13 +81,20 @@ public class Main {
         Data data = new Data(testerData, testerLabels);
 
         // Data data = new Data(data_, labels);
-        // data.zScoreNormalization();
+        data.zScoreNormalization();
         data.split(0.2);
 
         // Random random = new Random();
         // double[] sample1 = new double[]{1, 6, 11};
+        // double[] labels1 = new double[]{0, 1, 0};
         // double[] sample2 = new double[]{2, 7, 12};
         // double[] sample3 = new double[]{3, 8, 13};
+        // SimpleMatrix samples = new SimpleMatrix(sample1);
+        // SimpleMatrix testLs = new SimpleMatrix(labels1);
+        // System.out.println(samples);
+        // System.out.println(testLs);
+        // CatCrossEntropy c = new CatCrossEntropy();
+        // System.out.println(c.execute2(samples, testLs));
         // double[] sample4 = new double[]{4, 9, 14};
         // double[] sample5 = new double[]{5, 10, 15};
         // // double[] sample1 = new double[]{random.nextDouble(), random.nextDouble(), random.nextDouble()};
@@ -111,26 +119,34 @@ public class Main {
 
         nn.forwardPass(data.getData(), data.getLabels());
 
-        for (Layer l: nn.getLayers()) {
-            System.out.println(l.getClass().getSimpleName() + " - Activation Function: " + l.getActFunc().getClass().getSimpleName());
-            System.out.println("activation matrix:");
-            System.out.println(l.getActivations());
-            System.out.println("weights:");
-            System.out.println(l.getWeights());
-            System.out.println("weights momentum:");
-            System.out.println(l.getWeightsMomentum());
-            System.out.println("weights variance:");
-            System.out.println(l.getWeightsVariance());
-            System.out.println("biases:");
-            System.out.println(l.getBias());
-            System.out.println("biases momentum:");
-            System.out.println(l.getBiasMomentum());
-            System.out.println("biases variance:");
-            System.out.println(l.getBiasVariance());
-        }
+        // for (Layer l: nn.getLayers()) {
+        //     System.out.println(l.getClass().getSimpleName() + " - Activation Function: " + l.getActFunc().getClass().getSimpleName());
+        //     System.out.println("activation matrix:");
+        //     System.out.println(l.getActivations());
+        //     System.out.println("weights:");
+        //     System.out.println(l.getWeights());
+        //     System.out.println("weights momentum:");
+        //     System.out.println(l.getWeightsMomentum());
+        //     System.out.println("weights variance:");
+        //     System.out.println(l.getWeightsVariance());
+        //     System.out.println("biases:");
+        //     System.out.println(l.getBias());
+        //     System.out.println("biases momentum:");
+        //     System.out.println(l.getBiasMomentum());
+        //     System.out.println("biases variance:");
+        //     System.out.println(l.getBiasVariance());
+        // }
 
-        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), 32, 75);
+        // CatCrossEntropy c = new CatCrossEntropy();
+        // System.out.println(c.execute(d3.getActivations(), data.getLabels()));
+
+
+
+        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), 5, 75);
         // nn.batchFit(data.getTrainData(), 75);
+
+        System.out.println(data.getTrainData());
+        System.out.println(data.getTestData());
 
     }
 }

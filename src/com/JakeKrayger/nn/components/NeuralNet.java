@@ -190,6 +190,7 @@ public class NeuralNet {
 
         Output outLayer = (Output) layers.get(layers.size() - 1);
         this.loss = outLayer.getLoss().execute(outLayer.getActivations(), labels);
+        // System.out.println("LOSS: " + loss);
     }
 
 

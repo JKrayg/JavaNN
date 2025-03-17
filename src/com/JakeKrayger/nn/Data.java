@@ -43,7 +43,6 @@ public class Data {
         }
 
         if (classes.size() > 2) {
-            // this.labels = new SimpleMatrix(ls);
             this.labels = oneHot(new SimpleMatrix(ls));
         } else {
             this.labels = new SimpleMatrix(ls);

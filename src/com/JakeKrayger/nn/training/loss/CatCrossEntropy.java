@@ -5,8 +5,14 @@ import src.com.JakeKrayger.nn.components.Layer;
 
 public class CatCrossEntropy extends Loss {
     public double execute(SimpleMatrix activations, SimpleMatrix labels) {
-        // -sum(y[i] * Math.log(a[i])) over classes.
-        return 0.0;
+        int rows = activations.getNumRows();
+        int cols = activations.getNumCols();
+        SimpleMatrix error = new SimpleMatrix(rows, cols);
+        // need to prevent log(0)
+        for (int i = 0; i < rows; i++) {
+            error.setRow(i, labels.getRow(i).elementMult(activations.getRow(i).elementLog()));
+        }
+        return -(error.elementSum() / rows);
     }
 
     public SimpleMatrix gradient(Layer out, SimpleMatrix labels) {
