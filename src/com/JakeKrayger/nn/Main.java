@@ -68,19 +68,19 @@ public class Main {
         double[][] data_ = dataArrayList.toArray(new double[0][]);
         String[] labels = labelsArrayList.toArray(new String[0]);
 
-        double[][] testerData = new double[50][];
-        String[] testerLabels = new String[50];
-        Random rand = new Random();
+        // double[][] testerData = new double[150][];
+        // String[] testerLabels = new String[150];
+        // Random rand = new Random();
 
-        for (int i = 0; i < 50; i++) {
-            int r = rand.nextInt(0, labels.length);
-            testerData[i] = data_[r].clone();
-            testerLabels[i] = labels[r];
-        }
+        // for (int i = 0; i < 150; i++) {
+        //     int r = rand.nextInt(0, labels.length);
+        //     testerData[i] = data_[r].clone();
+        //     testerLabels[i] = labels[r];
+        // }
 
-        Data data = new Data(testerData, testerLabels);
+        // Data data = new Data(testerData, testerLabels);
 
-        // Data data = new Data(data_, labels);
+        Data data = new Data(data_, labels);
         data.zScoreNormalization();
         data.split(0.2);
 
@@ -109,15 +109,16 @@ public class Main {
 
         NeuralNet nn = new NeuralNet();
         Dense d1 = new Dense(4, new ReLU(), 4);
-        Dense d2 = new Dense(2, new ReLU());
+        Dense d2 = new Dense(8, new ReLU());
         Output d3 = new Output(data.getClasses().size(), new Softmax());
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-        nn.compile(new Adam(0.001), new CatCrossEntropy());
+        nn.compile(new Adam(0.005), new CatCrossEntropy());
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), 32, 40);
         // nn.compile(new SGD(0.001), new BinCrossEntropy());
 
-        nn.forwardPass(data.getData(), data.getLabels());
+        // nn.forwardPass(data.getData(), data.getLabels());
 
         // for (Layer l: nn.getLayers()) {
         //     System.out.println(l.getClass().getSimpleName() + " - Activation Function: " + l.getActFunc().getClass().getSimpleName());
@@ -142,11 +143,12 @@ public class Main {
 
 
 
-        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), 5, 75);
-        // nn.batchFit(data.getTrainData(), 75);
+        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), 32, 75);
+        // System.out.println(d3.getActivations());
+        // nn.batchFit(data.getTrainData(),data.getTestData(), 30);
 
-        System.out.println(data.getTrainData());
-        System.out.println(data.getTestData());
+        // System.out.println(data.getTrainData());
+        // System.out.println(data.getTestData());
 
     }
 }

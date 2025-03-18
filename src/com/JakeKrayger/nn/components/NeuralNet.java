@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import org.ejml.simple.SimpleMatrix;
-
-import src.com.JakeKrayger.nn.Data;
 import src.com.JakeKrayger.nn.activation.*;
 import src.com.JakeKrayger.nn.initialize.*;
 import src.com.JakeKrayger.nn.layers.*;
@@ -19,6 +17,7 @@ public class NeuralNet {
     private Loss lossFunc;
     private double loss;
     private double learningRate;
+    private int numClasses;
     private MathUtils maths = new MathUtils();
 
     public ArrayList<Layer> getLayers() {
@@ -64,6 +63,7 @@ public class NeuralNet {
 
         for (Layer lyr : layers) {
             if (lyr instanceof Output) {
+                this.numClasses = lyr.getNumNeurons();
                 lyr.setLoss(l);
             }
             
@@ -81,6 +81,7 @@ public class NeuralNet {
 
     public void miniBatchFit(SimpleMatrix train, SimpleMatrix test, int batchSize, int epochs) {
         // shuffle data and get new batches of size batchSize for each epoch
+        // int numClasses = layers.get(layers.size() - 1).getNumNeurons();
         for (int i = 0; i < epochs; i++) {
             ArrayList<SimpleMatrix> shuffled = new ArrayList<>();
             ArrayList<SimpleMatrix> batchesData = new ArrayList<>();
@@ -98,8 +99,10 @@ public class NeuralNet {
                     currBatch.setRow(count, shuffled.get(p));
                     count += 1;
                 }
-                batchesData.add(currBatch.extractMatrix(0, batchSize, 0, train.getNumCols() - 1));
-                batchesLabels.add(currBatch.extractVector(false, train.getNumCols() - 1));
+                // batchesData.add(currBatch.extractMatrix(0, batchSize, 0, train.getNumCols() - 1));
+                // batchesLabels.add(currBatch.extractVector(false, train.getNumCols() - 1));
+                batchesData.add(currBatch.extractMatrix(0, currBatch.getNumRows(), 0, currBatch.getNumCols() - (numClasses > 2 ? numClasses : 1)));
+                batchesLabels.add(currBatch.extractMatrix(0, currBatch.getNumRows(), currBatch.getNumCols() - (numClasses > 2 ? numClasses : 1), currBatch.getNumCols()));
             }
 
             // last batch - find a better way
@@ -110,8 +113,10 @@ public class NeuralNet {
                     lastBatch.setRow(count, shuffled.get(m));
                     count += 1;
                 }
-                batchesData.add(lastBatch.extractMatrix(0, shuffled.size() % batchSize, 0, train.getNumCols() - 1));
-                batchesLabels.add(lastBatch.extractVector(false, train.getNumCols() - 1));
+                // batchesData.add(lastBatch.extractMatrix(0, shuffled.size() % batchSize, 0, train.getNumCols() - 1));
+                // batchesLabels.add(lastBatch.extractVector(false, train.getNumCols() - 1));
+                batchesData.add(lastBatch.extractMatrix(0, lastBatch.getNumRows(), 0, lastBatch.getNumCols() - (numClasses > 2 ? numClasses : 1)));
+                batchesLabels.add(lastBatch.extractMatrix(0, lastBatch.getNumRows(), lastBatch.getNumCols() - (numClasses > 2 ? numClasses : 1), lastBatch.getNumCols()));
             }
             
 
@@ -123,8 +128,10 @@ public class NeuralNet {
             }
 
             // get loss
-            SimpleMatrix data = train.extractMatrix(0, train.getNumRows(), 0, train.getNumCols() - 1);
-            SimpleMatrix labels = train.extractVector(false, train.getNumCols() - 1);
+            // SimpleMatrix data = train.extractMatrix(0, train.getNumRows(), 0, train.getNumCols() - 1);
+            // SimpleMatrix labels = train.extractVector(false, train.getNumCols() - 1);
+            SimpleMatrix data = train.extractMatrix(0, train.getNumRows(), 0, train.getNumCols() - (numClasses > 2 ? numClasses : 1));
+            SimpleMatrix labels = train.extractMatrix(0, train.getNumRows(), train.getNumCols() - (numClasses > 2 ? numClasses : 1), train.getNumCols());
 
             forwardPass(data, labels);
             // System.out.println("LOSS: " + loss);
@@ -133,27 +140,35 @@ public class NeuralNet {
         
 
         // test
-        SimpleMatrix testData = test.extractMatrix(0, test.getNumRows(), 0, test.getNumCols() - 1);
-        SimpleMatrix testLabels = test.extractVector(false, test.getNumCols() - 1);
+        // SimpleMatrix testData = test.extractMatrix(0, test.getNumRows(), 0, test.getNumCols() - 1);
+        // SimpleMatrix testLabels = test.extractVector(false, test.getNumCols() - 1);
+        SimpleMatrix testData = test.extractMatrix(0, test.getNumRows(), 0, test.getNumCols() - (numClasses > 2 ? numClasses : 1));
+        SimpleMatrix testLabels = test.extractMatrix(0, test.getNumRows(), test.getNumCols() - (numClasses > 2 ? numClasses : 1), test.getNumCols());
 
         forwardPass(testData, testLabels);
         Output outLayer = (Output) layers.get(layers.size() - 1);
-        System.out.println("Prediction : True Value");
+        System.out.println("Prediction : one hot label");
         for (int h = 0; h < testData.getNumRows(); h++) {
-            System.out.print(outLayer.getActivations().get(h));
-            System.out.print(" : " + testLabels.get(h));
-            System.out.println();
+            System.out.print(outLayer.getActivations().getRow(h).concatColumns(testLabels.getRow(h)));
         }
+        // System.out.println("Prediction : True Value");
+        // for (int h = 0; h < testData.getNumRows(); h++) {
+        //     System.out.print(outLayer.getActivations().get(h));
+        //     System.out.print(" : " + testLabels.get(h));
+        //     System.out.println();
+        // }
         
         
     }
 
 
 
-    public void batchFit(SimpleMatrix trainData, int epochs) {
+    public void batchFit(SimpleMatrix train, SimpleMatrix test, int epochs) {
         for (int i = 0; i < epochs; i++) {
-            SimpleMatrix data = trainData.extractMatrix(0, trainData.getNumRows(), 0, trainData.getNumCols() - 1);
-            SimpleMatrix labels = trainData.extractVector(false, trainData.getNumCols() - 1);
+            SimpleMatrix data = train.extractMatrix(0, train.getNumRows(), 0, train.getNumCols() - (numClasses > 2 ? numClasses : 1) > 2 ? numClasses : 1);
+            SimpleMatrix labels = train.extractMatrix(0, train.getNumRows(), train.getNumCols() - (numClasses > 2 ? numClasses : 1), train.getNumCols());
+            // SimpleMatrix data = trainData.extractMatrix(0, trainData.getNumRows(), 0, trainData.getNumCols() - 1);
+            // SimpleMatrix labels = trainData.extractVector(false, trainData.getNumCols() - 1);
 
             forwardPass(data, labels);
             System.out.println("LOSS: " + loss);
@@ -163,6 +178,25 @@ public class NeuralNet {
                 ((Adam) optimizer).updateCount();
             }
             
+        }
+
+        SimpleMatrix testData = test.extractMatrix(0, test.getNumRows(), 0, test.getNumCols() - (numClasses > 2 ? numClasses : 1));
+        SimpleMatrix testLabels = test.extractMatrix(0, test.getNumRows(), test.getNumCols() - (numClasses > 2 ? numClasses : 1), test.getNumCols());
+        // SimpleMatrix testData = test.extractMatrix(0, test.getNumRows(), 0, test.getNumCols() - 1);
+        // SimpleMatrix testLabels = test.extractVector(false, test.getNumCols() - 1);
+
+        forwardPass(testData, testLabels);
+        Output outLayer = (Output) layers.get(layers.size() - 1);
+        // System.out.println("Prediction (first three) : one hot label (last three)");
+        // for (int h = 0; h < testData.getNumRows(); h++) {
+        //     System.out.print(outLayer.getActivations().getRow(h).concatColumns(testLabels.getRow(h)));
+        // }
+
+        System.out.println("Prediction : True Value");
+        for (int h = 0; h < testData.getNumRows(); h++) {
+            System.out.print(outLayer.getActivations().get(h));
+            System.out.print(" : " + testLabels.get(h));
+            System.out.println();
         }
     }
 
