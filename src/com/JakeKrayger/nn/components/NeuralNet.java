@@ -8,12 +8,14 @@ import src.com.JakeKrayger.nn.activation.*;
 import src.com.JakeKrayger.nn.initialize.*;
 import src.com.JakeKrayger.nn.layers.*;
 import src.com.JakeKrayger.nn.training.loss.*;
+import src.com.JakeKrayger.nn.training.metrics.Metrics;
 import src.com.JakeKrayger.nn.training.optimizers.*;
 import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class NeuralNet {
     private ArrayList<Layer> layers;
     private Optimizer optimizer;
+    private Metrics metrics;
     private Loss lossFunc;
     private double loss;
     private double learningRate;
@@ -56,10 +58,11 @@ public class NeuralNet {
     }
 
 
-    public void compile(Optimizer o, Loss l) {
+    public void compile(Optimizer o, Loss l, Metrics m) {
         this.optimizer = o;
         this.lossFunc = l;
         this.learningRate = o.getLearningRate();
+        this.metrics = m;
 
         for (Layer lyr : layers) {
             if (lyr instanceof Output) {
@@ -147,16 +150,18 @@ public class NeuralNet {
 
         forwardPass(testData, testLabels);
         Output outLayer = (Output) layers.get(layers.size() - 1);
-        System.out.println("Prediction : one hot label");
-        for (int h = 0; h < testData.getNumRows(); h++) {
-            System.out.print(outLayer.getActivations().getRow(h).concatColumns(testLabels.getRow(h)));
-        }
-        // System.out.println("Prediction : True Value");
+        metrics.getMetrics(outLayer.getActivations(), testLabels);
+        // results(outLayer.getActivations(), testLabels);
+        // System.out.println("Prediction : one hot label");
         // for (int h = 0; h < testData.getNumRows(); h++) {
-        //     System.out.print(outLayer.getActivations().get(h));
-        //     System.out.print(" : " + testLabels.get(h));
-        //     System.out.println();
+        //     System.out.print(outLayer.getActivations().getRow(h).concatColumns(testLabels.getRow(h)));
         // }
+        System.out.println("Prediction : True Value");
+        for (int h = 0; h < testData.getNumRows(); h++) {
+            System.out.print(outLayer.getActivations().get(h));
+            System.out.print(" : " + testLabels.get(h));
+            System.out.println();
+        }
         
         
     }
@@ -199,6 +204,10 @@ public class NeuralNet {
             System.out.println();
         }
     }
+
+    // public void results(SimpleMatrix res, SimpleMatrix truth) {
+    //     System.out.println(metrics.accuracy(res, truth, 0.5));
+    // }
 
 
 
