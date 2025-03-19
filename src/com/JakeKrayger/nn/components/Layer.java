@@ -9,6 +9,7 @@ import src.com.JakeKrayger.nn.layers.Output;
 import src.com.JakeKrayger.nn.training.loss.BinCrossEntropy;
 import src.com.JakeKrayger.nn.training.loss.Loss;
 import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
+import src.com.JakeKrayger.nn.training.regularizers.Regularizer;
 
 public class Layer {
     private int numNeurons;
@@ -24,6 +25,7 @@ public class Layer {
     private SimpleMatrix gradientWrtBiases;
     private ActivationFunction func;
     private Loss loss;
+    private Regularizer regularizer;
     private int inputSize;
 
     public Layer() {}
@@ -33,9 +35,22 @@ public class Layer {
         this.func = func;
     }
 
+    public Layer(int numNeurons, ActivationFunction func, Regularizer r) {
+        this.numNeurons = numNeurons;
+        this.func = func;
+        this.regularizer = r;
+    }
+
     public Layer(int numNeurons, ActivationFunction func, int inputSize) {
         this.numNeurons = numNeurons;
         this.func = func;
+        this.inputSize = inputSize;
+    }
+
+    public Layer(int numNeurons, ActivationFunction func, Regularizer r, int inputSize) {
+        this.numNeurons = numNeurons;
+        this.func = func;
+        this.regularizer = r;
         this.inputSize = inputSize;
     }
 
@@ -121,6 +136,10 @@ public class Layer {
 
     public ActivationFunction getActFunc() {
         return func;
+    }
+
+    public Regularizer getRegularizer() {
+        return regularizer;
     }
 
     public int getInputSize() {

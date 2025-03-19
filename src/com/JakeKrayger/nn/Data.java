@@ -14,6 +14,7 @@ public class Data {
     private SimpleMatrix labels;
     private SimpleMatrix train;
     private SimpleMatrix test;
+    private SimpleMatrix validation;
     private HashMap<String, Integer> classes;
 
     public Data() {}
@@ -78,6 +79,10 @@ public class Data {
         return train;
     }
 
+    public SimpleMatrix getValData() {
+        return validation;
+    }
+
     public HashMap<String, Integer> getClasses() {
         return classes;
     }
@@ -99,28 +104,47 @@ public class Data {
         }
     }
 
-    public void split(double testSize) {
+    public void split(double testSize, double valSize) {
         // gotta be a better way
         int rows = data.getNumRows();
         int cols = data.getNumCols();
         int numOfTest = (int) Math.floor(rows * testSize);
+        int numOfVal = (int) Math.floor(rows * valSize);
+
         double[][] testD = new double[numOfTest][cols];
-        double[][] trainD = new double[rows - numOfTest][cols];
+        double[][] valD = new double[numOfVal][cols];
+        double[][] trainD = new double[rows - (numOfTest + numOfVal)][cols];
+        
         double[][] testL = new double[numOfTest][classes.size() > 2 ? classes.size() : 0];
-        double[][] trainL = new double[rows - numOfTest][classes.size() > 2 ? classes.size() : 0];
+        double[][] valL = new double[numOfVal][classes.size() > 2 ? classes.size() : 0];
+        double[][] trainL = new double[rows - (numOfTest + numOfVal)][classes.size() > 2 ? classes.size() : 0];
+
         Random rand = new Random();
         Set<Integer> used = new HashSet<>();
 
-        for (int j = 0; j < numOfTest; j++) {
+        // test set
+        for (int i = 0; i < numOfTest; i++) {
             int newRand = rand.nextInt(0, rows);
             while (used.contains(newRand)) {
                 newRand = rand.nextInt(0, rows);
             }
             used.add(newRand);
-            testD[j] = data.extractVector(true, newRand).toArray2()[0];
-            testL[j] = labels.getRow(newRand).toArray2()[0];
+            testD[i] = data.extractVector(true, newRand).toArray2()[0];
+            testL[i] = labels.getRow(newRand).toArray2()[0];
         }
 
+        // validation set
+        for (int j = 0; j < numOfVal; j++) {
+            int newRand = rand.nextInt(0, rows);
+            while (used.contains(newRand)) {
+                newRand = rand.nextInt(0, rows);
+            }
+            used.add(newRand);
+            valD[j] = data.extractVector(true, newRand).toArray2()[0];
+            valL[j] = labels.getRow(newRand).toArray2()[0];
+        }
+
+        // train set
         ArrayList<double[]> trainDList = new ArrayList<>();
         ArrayList<double[]> trainLList = new ArrayList<>();
 
@@ -142,8 +166,12 @@ public class Data {
         SimpleMatrix test = new SimpleMatrix(testD);
         test = test.concatColumns(new SimpleMatrix(testL));
 
+        SimpleMatrix val = new SimpleMatrix(valD);
+        val = val.concatColumns(new SimpleMatrix(valL));
+
         this.train = train;
         this.test = test;
+        this.validation = val;
 
 
     }

@@ -2,6 +2,7 @@ package src.com.JakeKrayger.nn;
 
 // Jake Krayger
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Scanner;
 
 import org.ejml.simple.SimpleMatrix;
@@ -67,11 +68,11 @@ public class Main {
         double[][] data_ = dataArrayList.toArray(new double[0][]);
         String[] labels = labelsArrayList.toArray(new String[0]);
 
-        // double[][] testerData = new double[150][];
-        // String[] testerLabels = new String[150];
+        // double[][] testerData = new double[75][];
+        // String[] testerLabels = new String[75];
         // Random rand = new Random();
 
-        // for (int i = 0; i < 150; i++) {
+        // for (int i = 0; i < 75; i++) {
         //     int r = rand.nextInt(0, labels.length);
         //     testerData[i] = data_[r].clone();
         //     testerLabels[i] = labels[r];
@@ -81,21 +82,29 @@ public class Main {
 
         Data data = new Data(data_, labels);
         data.zScoreNormalization();
-        data.split(0.2);
+        data.split(0.15, 0.15);
 
         NeuralNet nn = new NeuralNet();
-        Dense d1 = new Dense(4, new ReLU(), 30);
-        Dense d2 = new Dense(8, new ReLU());
+        Dense d1 = new Dense(8, new ReLU(), 30);
+        Dense d2 = new Dense(4, new ReLU());
         Output d3 = new Output(1, new Sigmoid());
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-        nn.compile(new Adam(0.001), new BinCrossEntropy(), new BinaryMetrics(0.7));
+        nn.compile(new Adam(0.001), new BinCrossEntropy(), new BinaryMetrics(0.6));
         // nn.compile(new SGD(0.001), new BinCrossEntropy());
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), 32, 50);
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 50);
         // nn.batchFit(data.getTrainData(),data.getTestData(), 30);
-        // nn.forwardPass(data.getData(), data.getLabels());
+        
 
+
+
+
+
+
+
+
+        // nn.forwardPass(data.getData(), data.getLabels());
         // for (Layer l: nn.getLayers()) {
         //     System.out.println(l.getClass().getSimpleName() + " - Activation Function: " + l.getActFunc().getClass().getSimpleName());
         //     System.out.println("activation matrix:");
@@ -113,16 +122,7 @@ public class Main {
         //     System.out.println("biases variance:");
         //     System.out.println(l.getBiasVariance());
         // }
-
-        // CatCrossEntropy c = new CatCrossEntropy();
-        // System.out.println(c.execute(d3.getActivations(), data.getLabels()));
-
-
-
-        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), 32, 75);
-        // System.out.println(d3.getActivations());
         
-
         // System.out.println(data.getTrainData());
         // System.out.println(data.getTestData());
 

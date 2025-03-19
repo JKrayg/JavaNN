@@ -5,6 +5,10 @@ import org.ejml.simple.SimpleMatrix;
 public class BinaryMetrics extends Metrics {
     private double threshold;
 
+    public BinaryMetrics() {
+        this.threshold = 0.5;
+    }
+
     public BinaryMetrics(double threshold) {
         this.threshold = threshold;
     }
@@ -13,6 +17,7 @@ public class BinaryMetrics extends Metrics {
         String dis = "Accuracy: " + accuracy(pred, trueVals) + "\n";
         dis += "Precision: " + precision(pred, trueVals) + "\n";
         dis += "Recall: " + recall(pred, trueVals) + "\n";
+        dis += "F1 score: " + f1(pred, trueVals) + "\n";
         System.out.println(dis);
     }
 
@@ -72,24 +77,12 @@ public class BinaryMetrics extends Metrics {
     }
 
     public double f1(SimpleMatrix pred, SimpleMatrix trueVals) {
-        int correct = 0;
-        int ones = 0;
-        double[] preds = thresh(pred);
-
-        for (int i = 0; i < preds.length; i++) {
-            if (trueVals.get(i) == 1.0) {
-                ones += 1;
-                if (preds[i] == 1.0) {
-                    correct += 1;
-                }
-            } 
-        }
-        
-        double prec = ((double) correct) / ((double) ones);
-        if (Double.isNaN(prec)) {
+        double r = recall(pred, trueVals);
+        double p = precision(pred, trueVals);
+        if (Double.isNaN(r) || Double.isNaN(p)) {
             return 0.0;
         } else {
-            return prec;
+            return 2.0 / (1.0 / p + 1.0 / r);
         }
     }
 
