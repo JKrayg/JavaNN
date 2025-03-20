@@ -13,6 +13,7 @@ import src.com.JakeKrayger.nn.components.*;
 import src.com.JakeKrayger.nn.layers.*;
 import src.com.JakeKrayger.nn.training.loss.*;
 import src.com.JakeKrayger.nn.training.metrics.BinaryMetrics;
+import src.com.JakeKrayger.nn.training.metrics.MultiClassMetrics;
 import src.com.JakeKrayger.nn.training.optimizers.*;
 
 public class Main {
@@ -94,7 +95,20 @@ public class Main {
         nn.compile(new Adam(0.001), new BinCrossEntropy(), new BinaryMetrics(0.6));
         // nn.compile(new SGD(0.001), new BinCrossEntropy());
         nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 50);
-        // nn.batchFit(data.getTrainData(),data.getTestData(), 30);
+        // nn.batchFit(data.getTrainData(), data.getTestData(), 30);
+
+        // MultiClassMetrics m = new MultiClassMetrics();
+        // SimpleMatrix trainD = data.getTrainData();
+        // SimpleMatrix testData = trainD.extractMatrix(
+        //     0, trainD.getNumRows(), 0, trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1));
+        // SimpleMatrix testLabels = trainD.extractMatrix(
+        //     0, trainD.getNumRows(), trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1), trainD.getNumCols());
+
+        // nn.forwardPass(testData, testLabels);
+        // // System.out.println("de act: ");
+        // System.out.println(d3.getActivations().concatColumns(new SimpleMatrix(m.thresh(d3.getActivations()))));
+        // System.out.println("d3 thresh:");
+        // System.out.println(new SimpleMatrix(m.thresh(d3.getActivations())));
         
 
 

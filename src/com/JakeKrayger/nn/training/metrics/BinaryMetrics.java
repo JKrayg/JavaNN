@@ -4,6 +4,11 @@ import org.ejml.simple.SimpleMatrix;
 
 public class BinaryMetrics extends Metrics {
     private double threshold;
+    private double tp;
+    private double fp;
+    private double tn;
+    private double fn;
+    private SimpleMatrix confusionMatrix;
 
     public BinaryMetrics() {
         this.threshold = 0.5;
@@ -14,6 +19,8 @@ public class BinaryMetrics extends Metrics {
     }
 
     public void getMetrics(SimpleMatrix pred, SimpleMatrix trueVals) {
+        System.out.println("Confusion Matrix: ");
+        System.out.println(confusion(pred, trueVals));
         String dis = "Accuracy: " + accuracy(pred, trueVals) + "\n";
         dis += "Precision: " + precision(pred, trueVals) + "\n";
         dis += "Recall: " + recall(pred, trueVals) + "\n";
@@ -21,60 +28,65 @@ public class BinaryMetrics extends Metrics {
         System.out.println(dis);
     }
 
-    public double accuracy(SimpleMatrix pred, SimpleMatrix trueVals) {
-        int correct = 0;
+    public SimpleMatrix confusion(SimpleMatrix pred, SimpleMatrix trueVals) {
         double[] preds = thresh(pred);
+        double tp = 0.0;
+        double fp = 0.0;
+        double tn = 0.0;
+        double fn = 0.0; 
 
         for (int i = 0; i < preds.length; i++) {
-            if (preds[i] == trueVals.get(i)) {
-                correct += 1;
+            double label = trueVals.get(i);
+            if (preds[i] == 1.0) {
+                if (label == 1.0) {
+                    tp += 1.0;
+                } else {
+                    fp += 1.0;
+                }
+            } else {
+                if (label == 1.0) {
+                    fn += 1.0;
+                } else {
+                    tn += 1.0;
+                }
             }
         }
-        return ((double) correct) / ((double) preds.length);
+
+        this.tp = tp;
+        this.fp = fp;
+        this.tn = tn;
+        this.fn = fn;
+
+        double[][] confusionMatrix = new double[][]{{tp, fn}, {fp, tn}};
+        this.confusionMatrix = new SimpleMatrix(confusionMatrix);
+        return new SimpleMatrix(confusionMatrix);
     }
+
+
+    public double accuracy(SimpleMatrix pred, SimpleMatrix trueVals) {
+        return (tp + tn) / pred.getNumRows();
+    }
+
 
     public double precision(SimpleMatrix pred, SimpleMatrix trueVals) {
-        int correct = 0;
-        int wrong = 0;
-        double[] preds = thresh(pred);
-
-        for (int i = 0; i < preds.length; i++) {
-            if (trueVals.get(i) == 1.0 && preds[i] == 1.0) {
-                correct += 1;
-            } else if (preds[i] == 1.0) {
-                wrong += 1;
-            }
-        }
-
-        double prec = ((double) correct) / (((double) correct) + ((double) wrong));
+        double prec = tp / (tp + fp);
         if (Double.isNaN(prec)) {
             return 0.0;
         } else {
             return prec;
         }
     }
+
 
     public double recall(SimpleMatrix pred, SimpleMatrix trueVals) {
-        int correct = 0;
-        int ones = 0;
-        double[] preds = thresh(pred);
-
-        for (int i = 0; i < preds.length; i++) {
-            if (trueVals.get(i) == 1.0) {
-                ones += 1;
-                if (preds[i] == 1.0) {
-                    correct += 1;
-                }
-            } 
-        }
-        
-        double prec = ((double) correct) / ((double) ones);
-        if (Double.isNaN(prec)) {
+        double rec = tp / (tp + fn);
+        if (Double.isNaN(rec)) {
             return 0.0;
         } else {
-            return prec;
+            return rec;
         }
     }
+
 
     public double f1(SimpleMatrix pred, SimpleMatrix trueVals) {
         double r = recall(pred, trueVals);
@@ -85,6 +97,7 @@ public class BinaryMetrics extends Metrics {
             return 2.0 / (1.0 / p + 1.0 / r);
         }
     }
+
 
     public double[] thresh(SimpleMatrix pred) {
         double[] preds = new double[pred.getNumRows()];
