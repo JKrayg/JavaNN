@@ -12,9 +12,9 @@ import src.com.JakeKrayger.nn.activation.*;
 import src.com.JakeKrayger.nn.components.*;
 import src.com.JakeKrayger.nn.layers.*;
 import src.com.JakeKrayger.nn.training.loss.*;
-import src.com.JakeKrayger.nn.training.metrics.BinaryMetrics;
-import src.com.JakeKrayger.nn.training.metrics.MultiClassMetrics;
+import src.com.JakeKrayger.nn.training.metrics.*;
 import src.com.JakeKrayger.nn.training.optimizers.*;
+import src.com.JakeKrayger.nn.training.regularizers.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -83,21 +83,34 @@ public class Main {
 
         Data data = new Data(data_, labels);
         data.zScoreNormalization();
-        data.split(0.15, 0.15);
+
+        // SimpleMatrix dater = data.getData().extractMatrix(0, 30, 0, 30);
+        // SimpleMatrix labs = data.getLabels().extractMatrix(0, 30, 0, 1);
+        // SimpleMatrix trainDater = dater.extractMatrix(0, 20, 0, 30)
+        //                                .concatColumns(labs.extractMatrix(0, 20, 0, 1));
+        // SimpleMatrix testDater = dater.extractMatrix(20, 25, 0, 30)
+        //                                .concatColumns(labs.extractMatrix(20, 25, 0, 1));
+        // SimpleMatrix valDater = dater.extractMatrix(25, 30, 0, 30)
+        //                                .concatColumns(labs.extractMatrix(25, 30, 0, 1));
+
+        data.split(0.20, 0.20);
 
         NeuralNet nn = new NeuralNet();
-        Dense d1 = new Dense(8, new ReLU(), 30);
-        Dense d2 = new Dense(4, new ReLU());
-        Output d3 = new Output(1, new Sigmoid());
+        Dense d1 = new Dense(8, new ReLU(), new L2(0.01), 30);
+        Dense d2 = new Dense(4, new ReLU(), new L2(0.01));
+        Output d3 = new Output(1, new Sigmoid(), new L2(0.01));
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-        nn.compile(new Adam(0.001), new BinCrossEntropy(), new BinaryMetrics(0.6));
-        // nn.compile(new SGD(0.001), new BinCrossEntropy());
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 50);
-        // nn.batchFit(data.getTrainData(), data.getTestData(), 30);
+        nn.compile(new Adam(0.001), new BinCrossEntropy(), new BinaryMetrics());
+        // nn.compile(new SGD(0.01), new BinCrossEntropy(), new BinaryMetrics());
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 16, 15);
+        // nn.batchFit(data.getTrainData(), data.getTestData(), data.getValData(), 25);
 
         // MultiClassMetrics m = new MultiClassMetrics();
+
+        // SimpleMatrix preds = new SimpleMatrix(new double[][]{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
+        // SimpleMatrix truth = new SimpleMatrix(new double[][]{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
         // SimpleMatrix trainD = data.getTrainData();
         // SimpleMatrix testData = trainD.extractMatrix(
         //     0, trainD.getNumRows(), 0, trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1));
@@ -106,7 +119,17 @@ public class Main {
 
         // nn.forwardPass(testData, testLabels);
         // // System.out.println("de act: ");
-        // System.out.println(d3.getActivations().concatColumns(new SimpleMatrix(m.thresh(d3.getActivations()))));
+        // System.out.println("predictions: ");
+        // System.out.println(new SimpleMatrix(m.thresh(d3.getActivations())));
+        // System.out.println("truths: ");
+        // System.out.println(d3.getLabels());
+        // System.out.println(m.confusion(d3.getActivations(), d3.getLabels()));
+        // 
+        // System.out.println(preds);
+        // 
+        // System.out.println(truth);
+        // System.out.println(m.confusion(preds, truth));
+        
         // System.out.println("d3 thresh:");
         // System.out.println(new SimpleMatrix(m.thresh(d3.getActivations())));
         

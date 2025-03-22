@@ -39,51 +39,47 @@ public class Adam extends Optimizer {
         this.epsilon = epsilon;
     }
     
-    // clean these
+    
     public SimpleMatrix executeWeightsUpdate(Layer l) {
         SimpleMatrix gWrtW = l.getGradientWeights();
-        SimpleMatrix momentum = l.getWeightsMomentum();
-        SimpleMatrix momentumD = momentum.scale(momentumDecay);
-        SimpleMatrix momentumG = gWrtW.scale(1 - momentumDecay);
-        SimpleMatrix momentumOfWeights = momentumD.plus(momentumG);
+        SimpleMatrix momentumOfWeights = l.getWeightsMomentum()
+                                         .scale(momentumDecay)
+                                         .plus(gWrtW.scale(1 - momentumDecay));
 
-        SimpleMatrix variance = l.getWeightsVariance();
-        SimpleMatrix varianceD = variance.scale(varianceDecay);
-        SimpleMatrix varianceG = gWrtW.elementPower(2).scale(1 - varianceDecay);
-        SimpleMatrix varianceOfWeights = varianceD.plus(varianceG);
+        SimpleMatrix varianceOfWeights = l.getWeightsVariance()
+                                         .scale(varianceDecay)
+                                         .plus(gWrtW.elementPower(2).scale(1 - varianceDecay));
 
         SimpleMatrix currWeights = l.getWeights();
-        double learningRate = this.learningRate;
         SimpleMatrix biasCorrectedMomentum = momentumOfWeights.divide(1 - Math.pow(momentumDecay, updateCount));
         SimpleMatrix biasCorrectedVariance = varianceOfWeights.divide(1 - Math.pow(varianceDecay, updateCount));
-        double epsilon = this.epsilon;
-        SimpleMatrix biasCorrection = biasCorrectedMomentum.elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon));
-        SimpleMatrix biasCorrectionLr = biasCorrection.scale(learningRate);
-        SimpleMatrix updatedWeights = currWeights.minus(biasCorrectionLr);
+        SimpleMatrix biasCorrection = biasCorrectedMomentum
+                                      .elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon))
+                                      .scale(learningRate);
+
+        SimpleMatrix updatedWeights = currWeights.minus(biasCorrection);
 
         return updatedWeights;
     }
 
     public SimpleMatrix executeBiasUpdate(Layer l) {
         SimpleMatrix gWrtB = l.getGradientBias();
-        SimpleMatrix momentum = l.getBiasMomentum();
-        SimpleMatrix momentumD = momentum.scale(momentumDecay);
-        SimpleMatrix momentumG = gWrtB.scale(1 - momentumDecay);
-        SimpleMatrix momentumOfBiases = momentumD.plus(momentumG);
+        SimpleMatrix momentumOfBiases = l.getBiasMomentum()
+                                        .scale(momentumDecay)
+                                        .plus(gWrtB.scale(1 - momentumDecay));
 
-        SimpleMatrix variance = l.getBiasVariance();
-        SimpleMatrix varianceD = variance.scale(varianceDecay);
-        SimpleMatrix varianceG = gWrtB.elementPower(2).scale(1 - varianceDecay);
-        SimpleMatrix varianceOfBias = varianceD.plus(varianceG);
+        SimpleMatrix varianceOfBias = l.getBiasVariance()
+                                      .scale(varianceDecay)
+                                      .plus(gWrtB.elementPower(2).scale(1 - varianceDecay));
 
         SimpleMatrix currBiases = l.getBias();
-        double learningRate = this.learningRate;
         SimpleMatrix biasCorrectedMomentum = momentumOfBiases.divide(1 - Math.pow(momentumDecay, updateCount));
         SimpleMatrix biasCorrectedVariance = varianceOfBias.divide(1 - Math.pow(varianceDecay, updateCount));
-        double epsilon = this.epsilon;
-        SimpleMatrix biasCorrection = biasCorrectedMomentum.elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon));
-        SimpleMatrix biasCorrectionLr = biasCorrection.scale(learningRate);
-        SimpleMatrix updatedBiases = currBiases.minus(biasCorrectionLr);
+        SimpleMatrix biasCorrection = biasCorrectedMomentum
+                                      .elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon))
+                                      .scale(learningRate);
+
+        SimpleMatrix updatedBiases = currBiases.minus(biasCorrection);
 
         return updatedBiases;
     }

@@ -57,9 +57,9 @@ public class BinaryMetrics extends Metrics {
         this.tn = tn;
         this.fn = fn;
 
-        double[][] confusionMatrix = new double[][]{{tp, fn}, {fp, tn}};
-        this.confusionMatrix = new SimpleMatrix(confusionMatrix);
-        return new SimpleMatrix(confusionMatrix);
+        SimpleMatrix confusionMatrix = new SimpleMatrix(new double[][]{{tp, fn}, {fp, tn}});
+        this.confusionMatrix = confusionMatrix;
+        return confusionMatrix;
     }
 
 

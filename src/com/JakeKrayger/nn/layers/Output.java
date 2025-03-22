@@ -4,11 +4,16 @@ import org.ejml.simple.SimpleMatrix;
 import src.com.JakeKrayger.nn.activation.ActivationFunction;
 import src.com.JakeKrayger.nn.components.Layer;
 import src.com.JakeKrayger.nn.training.loss.Loss;
+import src.com.JakeKrayger.nn.training.regularizers.Regularizer;
 
 public class Output extends Layer {
     private SimpleMatrix labels;
     public Output(int numNeurons, ActivationFunction actFunc) {
         super(numNeurons, actFunc);
+    }
+
+    public Output(int numNeurons, ActivationFunction actFunc, Regularizer reg) {
+        super(numNeurons, actFunc, reg);
     }
 
     public void setLabels(SimpleMatrix labels) {

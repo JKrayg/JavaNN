@@ -6,6 +6,7 @@ import org.ejml.simple.SimpleMatrix;
 
 public class MultiClassMetrics extends Metrics{
     private double threshold;
+    private SimpleMatrix confusionMatrix;
 
     public MultiClassMetrics() {
         this.threshold = 0.5;
@@ -25,6 +26,57 @@ public class MultiClassMetrics extends Metrics{
         // dis += "Precision: " + precision(pred, trueVals) + "\n";
         dis += "Recall: " + recall(pred, trueVals) + "\n";
         System.out.println(dis);
+    }
+
+    public SimpleMatrix confusion(SimpleMatrix pred, SimpleMatrix trueVals) {
+        double[][] preds = thresh(pred);
+        int rows = pred.getNumRows();
+        int cols = pred.getNumCols();
+        SimpleMatrix cm = new SimpleMatrix(cols, cols);
+
+        for (int i = 0; i < cols; i++) {
+            SimpleMatrix currClass = new SimpleMatrix(1, cols);
+            SimpleMatrix currClassPred = new SimpleMatrix(new SimpleMatrix(preds).getColumn(i));
+            SimpleMatrix currClassTrue = trueVals.getColumn(i);
+            // System.out.println(currClassPred);
+            for (int j = 0; j < rows; j++) {
+                double currPred = currClassPred.get(j);
+                if (currPred == 1.0) {
+                    for (int k = 0; k < cols; k++) {
+                        if (trueVals.get(j, k) == 1.0) {
+                            cm.set(i, k, cm.get(k) + 1.0);
+                        }
+                    }
+                }
+                    // else if (currClassPred.get(j) == 0.0) {
+                    //     if (trueVals.get(j, k) == 1.0) {
+                    //         cm.set(i, k, cm.get(k) + 1.0);
+                    //     }
+                    // }
+
+            }
+        }
+
+        // for (int i = 0; i < preds.length; i++) {
+        //     double label = trueVals.get(i);
+        //     if (preds[i] == 1.0) {
+        //         if (label == 1.0) {
+        //             tp += 1.0;
+        //         } else {
+        //             fp += 1.0;
+        //         }
+        //     } else {
+        //         if (label == 1.0) {
+        //             fn += 1.0;
+        //         } else {
+        //             tn += 1.0;
+        //         }
+        //     }
+        // }
+
+        // SimpleMatrix confusionMatrix = new SimpleMatrix(new double[][]{{tp, fn}, {fp, tn}});
+        this.confusionMatrix = cm;
+        return cm;
     }
 
     public double accuracy(SimpleMatrix pred, SimpleMatrix trueVals) {

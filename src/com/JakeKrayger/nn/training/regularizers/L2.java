@@ -1,5 +1,7 @@
 package src.com.JakeKrayger.nn.training.regularizers;
 
+import org.ejml.simple.SimpleMatrix;
+
 public class L2 extends Regularizer {
     private double lambda;
 
@@ -9,6 +11,11 @@ public class L2 extends Regularizer {
 
     public L2(double lam) {
         this.lambda = lam;
+    }
+
+    public SimpleMatrix regularize(SimpleMatrix weights) {
+        SimpleMatrix w = weights.scale(lambda);
+        return w;
     }
     
 }
