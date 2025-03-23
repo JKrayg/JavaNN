@@ -96,15 +96,29 @@ public class Main {
         data.split(0.20, 0.20);
 
         NeuralNet nn = new NeuralNet();
-        Dense d1 = new Dense(8, new ReLU(), new L2(0.01), 30);
-        Dense d2 = new Dense(4, new ReLU(), new L2(0.01));
-        Output d3 = new Output(1, new Sigmoid(), new L2(0.01));
+        Dense d1 = new Dense(
+            8,
+            new ReLU(),
+            new L2(0.01),
+            30
+        );
+        Dense d2 = new Dense(
+            4,
+            new ReLU(),
+            new L2(0.01)
+        );
+        Output d3 = new Output(
+            1,
+            new Sigmoid(),
+            new L2(0.01)
+        );
+
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.compile(new Adam(0.001), new BinCrossEntropy(), new BinaryMetrics());
         // nn.compile(new SGD(0.01), new BinCrossEntropy(), new BinaryMetrics());
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 16, 15);
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 16, 7);
         // nn.batchFit(data.getTrainData(), data.getTestData(), data.getValData(), 25);
 
         // MultiClassMetrics m = new MultiClassMetrics();

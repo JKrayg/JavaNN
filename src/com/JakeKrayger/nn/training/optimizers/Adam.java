@@ -59,8 +59,33 @@ public class Adam extends Optimizer {
 
         SimpleMatrix updatedWeights = currWeights.minus(biasCorrection);
 
+        l.setWeightsMomentum(momentumOfWeights);
+        l.setWeightsVariance(varianceOfWeights);
+
         return updatedWeights;
     }
+
+    // public SimpleMatrix executeShiftUpdate(Layer l) {
+    //     SimpleMatrix gWrtS = l.getGradientShifts();
+    //     SimpleMatrix momentumOfShifts = l.getShiftsMomentum()
+    //                                      .scale(momentumDecay)
+    //                                      .plus(gWrtS.scale(1 - momentumDecay));
+
+    //     SimpleMatrix varianceOfShifts = l.getShiftsVariance()
+    //                                      .scale(varianceDecay)
+    //                                      .plus(gWrtS.elementPower(2).scale(1 - varianceDecay));
+
+    //     SimpleMatrix currShifts = l.getShifts();
+    //     SimpleMatrix biasCorrectedMomentum = momentumOfShifts.divide(1 - Math.pow(momentumDecay, updateCount));
+    //     SimpleMatrix biasCorrectedVariance = varianceOfShifts.divide(1 - Math.pow(varianceDecay, updateCount));
+    //     SimpleMatrix biasCorrection = biasCorrectedMomentum
+    //                                   .elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon))
+    //                                   .scale(learningRate);
+
+    //     SimpleMatrix updatedShifts = currShifts.minus(biasCorrection);
+
+    //     return updatedShifts;
+    // }
 
     public SimpleMatrix executeBiasUpdate(Layer l) {
         SimpleMatrix gWrtB = l.getGradientBias();
@@ -80,6 +105,9 @@ public class Adam extends Optimizer {
                                       .scale(learningRate);
 
         SimpleMatrix updatedBiases = currBiases.minus(biasCorrection);
+
+        l.setBiasesMomentum(momentumOfBiases);
+        l.setBiasesVariance(varianceOfBias);
 
         return updatedBiases;
     }
