@@ -16,10 +16,8 @@ public class NeuralNet {
     private ArrayList<Layer> layers;
     private Optimizer optimizer;
     private Metrics metrics;
-    private Loss lossFunc;
     private double loss;
     private double valLoss;
-    private double learningRate;
     private int numClasses;
     private MathUtils maths = new MathUtils();
 
@@ -58,18 +56,11 @@ public class NeuralNet {
 
     }
 
-    public void compile(Optimizer o, Loss l, Metrics m) {
+    public void compile(Optimizer o, Metrics m) {
         this.optimizer = o;
-        this.lossFunc = l;
-        this.learningRate = o.getLearningRate();
         this.metrics = m;
 
         for (Layer lyr : layers) {
-            if (lyr instanceof Output) {
-                this.numClasses = lyr.getNumNeurons();
-                lyr.setLoss(l);
-            }
-
             if (optimizer instanceof Adam) {
                 SimpleMatrix weightsO = new SimpleMatrix(lyr.getWeights().getNumRows(), lyr.getWeights().getNumCols());
                 SimpleMatrix biasO = new SimpleMatrix(lyr.getBias().getNumRows(), lyr.getBias().getNumCols());
@@ -158,6 +149,8 @@ public class NeuralNet {
         System.out.println();
         System.out.println("train metrics: ");
         metrics(train);
+        System.out.println("val metrics: ");
+        metrics(validation);
         System.out.println("test metrics: ");
         metrics(test);
 
@@ -170,9 +163,6 @@ public class NeuralNet {
                     train.getNumCols() - (numClasses > 2 ? numClasses : 1));
             SimpleMatrix labels = train.extractMatrix(
                     0, train.getNumRows(), train.getNumCols() - (numClasses > 2 ? numClasses : 1), train.getNumCols());
-
-            // System.out.println(data);
-            // System.out.println(labels);
 
             forwardPass(data, labels);
             backprop(data, labels);
@@ -226,18 +216,6 @@ public class NeuralNet {
     }
 
 
-    // public void loss(SimpleMatrix train) {
-    //     SimpleMatrix trainData = train.extractMatrix(
-    //             0, train.getNumRows(), 0, train.getNumCols() - (numClasses > 2 ? numClasses : 1));
-    //     SimpleMatrix trainLabels = train.extractMatrix(
-    //             0, train.getNumRows(), train.getNumCols() - (numClasses > 2 ? numClasses : 1), train.getNumCols());
-
-    //     forwardPass(trainData, trainLabels);
-    //     Output outLayer = (Output) layers.get(layers.size() - 1);
-    //     this.loss = outLayer.getLoss().execute(outLayer.getActivations(), trainLabels);
-    //     System.out.print("loss: " + loss + " - ");
-    // }
-
     public double loss(SimpleMatrix d) {
         SimpleMatrix data = d.extractMatrix(
                 0, d.getNumRows(), 0, d.getNumCols() - (numClasses > 2 ? numClasses : 1));
@@ -247,22 +225,7 @@ public class NeuralNet {
         forwardPass(data, labels);
         Output outLayer = (Output) layers.get(layers.size() - 1);
         return outLayer.getLoss().execute(outLayer.getActivations(), labels);
-        // this.loss = outLayer.getLoss().execute(outLayer.getActivations(), labels);
-        // System.out.print("loss: " + loss + " - ");
     }
-
-
-    // public void validationLoss(SimpleMatrix val) {
-    //     SimpleMatrix valData = val.extractMatrix(
-    //             0, val.getNumRows(), 0, val.getNumCols() - (numClasses > 2 ? numClasses : 1));
-    //     SimpleMatrix valLabels = val.extractMatrix(
-    //             0, val.getNumRows(), val.getNumCols() - (numClasses > 2 ? numClasses : 1), val.getNumCols());
-
-    //     forwardPass(valData, valLabels);
-    //     Output outLayer = (Output) layers.get(layers.size() - 1);
-    //     this.valLoss = outLayer.getLoss().execute(outLayer.getActivations(), valLabels);
-    //     System.out.print("val loss: " + valLoss + "\n");
-    // }
 
 
     public void backprop(SimpleMatrix data, SimpleMatrix labels) {
@@ -287,8 +250,6 @@ public class NeuralNet {
             Layer prev = layers.get(layers.indexOf(curr) - 1);
             gradientWrtWeights = out.gradientWeights(prev, gradient);
             gradientWrtBias = out.gradientBias(curr, gradient);
-            // curr.setGradientWeights(gradientWrtWeights);
-            // curr.setGradientBiases(gradientWrtBias);
         } else {
             Layer prev;
             if (layers.indexOf(curr) > 0) {
@@ -300,8 +261,6 @@ public class NeuralNet {
 
             gradientWrtWeights = currLayer.gradientWeights(prev, gradient);
             gradientWrtBias = currLayer.gradientBias(gradient);
-            // curr.setGradientWeights(gradientWrtWeights);
-            // curr.setGradientBiases(gradientWrtBias);
         }
 
         if (curr.getRegularizer() != null) {

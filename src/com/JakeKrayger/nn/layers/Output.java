@@ -8,12 +8,15 @@ import src.com.JakeKrayger.nn.training.regularizers.Regularizer;
 
 public class Output extends Layer {
     private SimpleMatrix labels;
-    public Output(int numNeurons, ActivationFunction actFunc) {
+    private Loss loss;
+
+    public Output(int numNeurons, ActivationFunction actFunc, Loss loss) {
         super(numNeurons, actFunc);
+        this.loss = loss;
     }
 
-    public Output(int numNeurons, ActivationFunction actFunc, Regularizer reg) {
-        super(numNeurons, actFunc, reg);
+    public Loss getLoss() {
+        return loss;
     }
 
     public void setLabels(SimpleMatrix labels) {

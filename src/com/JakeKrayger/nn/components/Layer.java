@@ -8,6 +8,7 @@ import src.com.JakeKrayger.nn.activation.Sigmoid;
 import src.com.JakeKrayger.nn.layers.Output;
 import src.com.JakeKrayger.nn.training.loss.BinCrossEntropy;
 import src.com.JakeKrayger.nn.training.loss.Loss;
+import src.com.JakeKrayger.nn.training.normalization.Normalization;
 import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
 import src.com.JakeKrayger.nn.training.regularizers.Regularizer;
 
@@ -26,20 +27,10 @@ public class Layer {
     private ActivationFunction func;
     private Loss loss;
     private Regularizer regularizer;
+    private Normalization normalization;
     private int inputSize;
 
     public Layer() {}
-
-    public Layer(int numNeurons, ActivationFunction func) {
-        this.numNeurons = numNeurons;
-        this.func = func;
-    }
-
-    public Layer(int numNeurons, ActivationFunction func, Regularizer r) {
-        this.numNeurons = numNeurons;
-        this.func = func;
-        this.regularizer = r;
-    }
 
     public Layer(int numNeurons, ActivationFunction func, int inputSize) {
         this.numNeurons = numNeurons;
@@ -47,11 +38,17 @@ public class Layer {
         this.inputSize = inputSize;
     }
 
-    public Layer(int numNeurons, ActivationFunction func, Regularizer r, int inputSize) {
+    public Layer(int numNeurons, ActivationFunction func) {
         this.numNeurons = numNeurons;
         this.func = func;
+    }
+
+    public void addRegularizer(Regularizer r) {
         this.regularizer = r;
-        this.inputSize = inputSize;
+    }
+
+    public void addNormalization(Normalization n) {
+        this.normalization = n;
     }
 
     public void setWeights(SimpleMatrix weights) {
@@ -142,6 +139,10 @@ public class Layer {
         return regularizer;
     }
 
+    public Normalization getNormalization() {
+        return normalization;
+    }
+
     public int getInputSize() {
         return inputSize;
     }
@@ -161,7 +162,7 @@ public class Layer {
     public SimpleMatrix getGradient() {
         SimpleMatrix gradient = null;
         if (this instanceof Output) {
-            gradient = loss.gradient(this, ((Output) this).getLabels());
+            gradient = this.getLoss().gradient(this, ((Output) this).getLabels());
         } else {
             gradient = func.gradient(this, preActivation);
         }

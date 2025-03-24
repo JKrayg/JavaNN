@@ -6,39 +6,26 @@ import src.com.JakeKrayger.nn.components.Layer;
 
 public class Adam extends Optimizer {
     private double learningRate;
-    private double momentumDecay;
-    private double varianceDecay;
-    private double epsilon;
+    private double momentumDecay = 0.9;
+    private double varianceDecay = 0.999;
+    private double epsilon = 1e-8;
     private int updateCount = 1;
 
     public Adam(double learningRate) {
         this.learningRate = learningRate;
-        this.momentumDecay = 0.9;
-        this.varianceDecay = 0.999;
-        this.epsilon = 1e-8;
-    }
-
-    public Adam(double learningRate, double momentumDecay) {
-        this.learningRate = learningRate;
-        this.momentumDecay = momentumDecay;
-        this.varianceDecay = 0.999;
-        this.epsilon = 1e-8;
-    }
-
-    public Adam(double learningRate, double momentumDecay, double varianceDecay) {
-        this.learningRate = learningRate;
-        this.momentumDecay = momentumDecay;
-        this.varianceDecay = varianceDecay;
-        this.epsilon = 1e-8;
-    }
-
-    public Adam(double learningRate, double momentumDecay, double varianceDecay, double epsilon) {
-        this.learningRate = learningRate;
-        this.momentumDecay = momentumDecay;
-        this.varianceDecay = varianceDecay;
-        this.epsilon = epsilon;
     }
     
+    public void setMomentumDecay(double md) {
+        this.momentumDecay = md;
+    }
+
+    public void setVarianceDecay(double vd) {
+        this.varianceDecay = vd;
+    }
+
+    public void setEpsilon(double epsilon) {
+        this.epsilon = epsilon;
+    }
     
     public SimpleMatrix executeWeightsUpdate(Layer l) {
         SimpleMatrix gWrtW = l.getGradientWeights();
@@ -83,6 +70,9 @@ public class Adam extends Optimizer {
     //                                   .scale(learningRate);
 
     //     SimpleMatrix updatedShifts = currShifts.minus(biasCorrection);
+
+        // l.setShiftMomentum(momentumOfWeights);
+        // l.getShiftVariance(varianceOfWeights);
 
     //     return updatedShifts;
     // }

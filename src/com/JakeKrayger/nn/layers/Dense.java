@@ -11,15 +11,7 @@ public class Dense extends Layer {
         super(numNeurons, actFunc);
     }
 
-    public Dense(int numNeurons, ActivationFunction actFunc, Regularizer reg) {
-        super(numNeurons, actFunc, reg);
-    }
-
     public Dense(int numNeurons, ActivationFunction actFunc, int inputSize) {
         super(numNeurons, actFunc, inputSize);
-    }
-
-    public Dense(int numNeurons, ActivationFunction actFunc, Regularizer reg, int inputSize) {
-        super(numNeurons, actFunc, reg, inputSize);
     }
 }
