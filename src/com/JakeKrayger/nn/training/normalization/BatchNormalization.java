@@ -64,4 +64,9 @@ public class BatchNormalization extends Normalization {
     public double getMomentum() {
         return momentum;
     }
+
+    public SimpleMatrix normalize(SimpleMatrix z) {
+        // **
+        return z;
+    }
 }

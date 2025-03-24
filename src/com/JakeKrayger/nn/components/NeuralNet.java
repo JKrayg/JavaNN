@@ -1,5 +1,6 @@
 package src.com.JakeKrayger.nn.components;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -9,6 +10,7 @@ import src.com.JakeKrayger.nn.initialize.*;
 import src.com.JakeKrayger.nn.layers.*;
 import src.com.JakeKrayger.nn.training.loss.*;
 import src.com.JakeKrayger.nn.training.metrics.Metrics;
+import src.com.JakeKrayger.nn.training.normalization.Normalization;
 import src.com.JakeKrayger.nn.training.optimizers.*;
 import src.com.JakeKrayger.nn.utils.MathUtils;
 
@@ -193,9 +195,26 @@ public class NeuralNet {
             Layer curr = layers.get(q);
             Layer prev = layers.get(q - 1);
             SimpleMatrix z = maths.weightedSum(prev, curr);
-            SimpleMatrix currAct = curr.getActFunc().execute(z);
+            // curr.setPreActivations(z);
+            Normalization norm = curr.getNormalization();
+            ActivationFunction actFunc = curr.getActFunc();
+            SimpleMatrix activated;
+
+            // normalization
+            if (norm != null) {
+                if (norm.isBeforeActivation()) {
+                    z = norm.normalize(z);
+                    activated = actFunc.execute(z);
+                } else {
+                    activated = actFunc.execute(z);
+                    activated = norm.normalize(activated);
+                }
+                
+            } else {
+                activated = actFunc.execute(z);
+            }
             curr.setPreActivations(z);
-            curr.setActivations(currAct);
+            curr.setActivations(activated);
 
             if (curr instanceof Output) {
                 ((Output) curr).setLabels(labels);
