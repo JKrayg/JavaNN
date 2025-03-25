@@ -66,7 +66,29 @@ public class BatchNormalization extends Normalization {
     }
 
     public SimpleMatrix normalize(SimpleMatrix z) {
-        // **
-        return z;
+        int rows = z.getNumRows();
+        int cols = z.getNumCols();
+        SimpleMatrix means = new SimpleMatrix(cols, 1);
+        SimpleMatrix variances = new SimpleMatrix(cols, 1);
+        SimpleMatrix norm = new SimpleMatrix(rows, cols);
+        if (scale == null && shift == null) {
+            scale = new SimpleMatrix(cols, 1);
+            scale.fill(1.0);
+            shift = new SimpleMatrix(cols, 1);
+        }
+        
+        for (int i = 0; i < cols; i++) {
+            SimpleMatrix currCol = z.getColumn(i);
+            double currMean = currCol.elementSum() / rows;
+            means.set(i, 0, currMean);
+
+            double currVariance = currCol.minus(currMean).elementPower(2).elementSum() / rows;
+            variances.set(i, 0, currVariance);
+
+            SimpleMatrix set = currCol.minus(currMean).divide(Math.sqrt(currVariance + epsilon));
+            norm.setColumn(i, set.scale(scale.get(i)).plus(shift.get(i)));
+        }
+
+        return norm;
     }
 }

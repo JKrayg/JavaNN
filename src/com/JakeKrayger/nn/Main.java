@@ -23,8 +23,8 @@ public class Main {
         // String filePath = "src\\resources\\datasets\\iris.data";
         String filePath = "src\\resources\\datasets\\mnist.csv";
         ArrayList<double[]> dataArrayList = new ArrayList<>();
-        // ArrayList<String> labelsStrArrayList = new ArrayList<>();
-        ArrayList<Integer> labelsIntArrayList = new ArrayList<>();
+        // ArrayList<String> labelsArrayList = new ArrayList<>();
+        ArrayList<Integer> labelsArrayList = new ArrayList<>();
         
 
         try {
@@ -51,7 +51,7 @@ public class Main {
                 // String line = scan.nextLine();
                 // String[] splitLine = line.split(",", 3);
                 // String label = splitLine[1];
-                // labelsStrArrayList.add(label);
+                // labelsArrayList.add(label);
                 // double[] toDub;
                 // String values = splitLine[2];
                 // String[] splitValues = values.split(",");
@@ -67,7 +67,7 @@ public class Main {
                 String line = scan.nextLine();
                 String[] splitLine = line.split(",", 2);
                 int label = Integer.parseInt(splitLine[0]);
-                labelsIntArrayList.add(label);
+                labelsArrayList.add(label);
                 double[] toDub;
                 String values = splitLine[1];
                 String[] splitValues = values.split(",");
@@ -87,8 +87,8 @@ public class Main {
 
 
         double[][] data_ = dataArrayList.toArray(new double[0][]);
-        // String[] labelsS = labelsStrArrayList.toArray(new String[0]);
-        Integer[] labelsI = labelsIntArrayList.toArray(new Integer[0]);
+        // String[] labels = labelsArrayList.toArray(new String[0]);
+        Integer[] labels = labelsArrayList.toArray(new Integer[0]);
 
         // System.out.println(new SimpleMatrix(data_).getRow(0));
         // System.out.println(labelsI[0]);
@@ -105,7 +105,7 @@ public class Main {
 
         // Data data = new Data(testerData, testerLabels);
 
-        Data data = new Data(data_, labelsI);
+        Data data = new Data(data_, labels);
         data.minMaxNormalization();
         // data.zScoreNormalization();
 
@@ -142,20 +142,27 @@ public class Main {
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.addLayer(d4);
-        nn.compile(new Adam(0.001), new MultiClassMetrics());
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 5);
-        // nn.batchFit(data.getTrainData(), data.getTestData(), data.getValData(), 25);
+        nn.compile(new Adam(0.005), new MultiClassMetrics());
+
+        BatchNormalization b = new BatchNormalization();
+        SimpleMatrix z = new SimpleMatrix(new  double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
+        b.normalize(z);
+        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 20);
+        // nn.batchFit(data.getTrainData(), data.getTestData(), data.getValData(), 100);
 
         // MultiClassMetrics m = new MultiClassMetrics();
 
         // SimpleMatrix preds = new SimpleMatrix(new double[][]{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
         // SimpleMatrix truth = new SimpleMatrix(new double[][]{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}});
-        // SimpleMatrix trainD = data.getTrainData();
+        // SimpleMatrix trainD = data.getTestData();
         // SimpleMatrix testData = trainD.extractMatrix(
-        //     0, trainD.getNumRows(), 0, trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1));
+        //     0, 1, 0, trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1));
         // SimpleMatrix testLabels = trainD.extractMatrix(
-        //     0, trainD.getNumRows(), trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1), trainD.getNumCols());
-
+        //     0, 1, trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1), trainD.getNumCols());
+        
+        // nn.forwardPass(testData, testLabels);
+        // System.out.println(d4.getActivations());
+        // System.out.println(testLabels);
         // nn.forwardPass(testData, testLabels);
         // // System.out.println("d3 act: ");
         // System.out.println("predictions: ");
