@@ -63,6 +63,10 @@ public class NeuralNet {
         this.metrics = m;
 
         for (Layer lyr : layers) {
+            if (lyr instanceof Output) {
+                this.numClasses = lyr.getNumNeurons();
+            }
+
             if (optimizer instanceof Adam) {
                 SimpleMatrix weightsO = new SimpleMatrix(lyr.getWeights().getNumRows(), lyr.getWeights().getNumCols());
                 SimpleMatrix biasO = new SimpleMatrix(lyr.getBias().getNumRows(), lyr.getBias().getNumCols());
@@ -195,7 +199,7 @@ public class NeuralNet {
             Layer curr = layers.get(q);
             Layer prev = layers.get(q - 1);
             SimpleMatrix z = maths.weightedSum(prev, curr);
-            // curr.setPreActivations(z);
+            curr.setPreActivations(z);
             Normalization norm = curr.getNormalization();
             ActivationFunction actFunc = curr.getActFunc();
             SimpleMatrix activated;
@@ -213,7 +217,6 @@ public class NeuralNet {
             } else {
                 activated = actFunc.execute(z);
             }
-            curr.setPreActivations(z);
             curr.setActivations(activated);
 
             if (curr instanceof Output) {
@@ -243,7 +246,16 @@ public class NeuralNet {
 
         forwardPass(data, labels);
         Output outLayer = (Output) layers.get(layers.size() - 1);
+        // double l2Penalty = 0;
+        // for (Layer l : layers) {
+        //     if (l.getRegularizer() != null) {
+        //         SimpleMatrix w = l.getWeights();
+        //         l2Penalty += 0.5 * 0.01 * w.elementMult(w).elementSum();
+        //     }  
+        // }
+        
         return outLayer.getLoss().execute(outLayer.getActivations(), labels);
+        //  + (l2Penalty / outLayer.getActivations().getNumRows());
     }
 
 

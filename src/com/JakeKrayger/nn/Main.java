@@ -19,10 +19,13 @@ import src.com.JakeKrayger.nn.training.regularizers.*;
 
 public class Main {
     public static void main(String[] args) {
-        String filePath = "src\\resources\\datasets\\wdbc.data";
+        // String filePath = "src\\resources\\datasets\\wdbc.data";
         // String filePath = "src\\resources\\datasets\\iris.data";
+        String filePath = "src\\resources\\datasets\\mnist.csv";
         ArrayList<double[]> dataArrayList = new ArrayList<>();
-        ArrayList<String> labelsArrayList = new ArrayList<>();
+        // ArrayList<String> labelsStrArrayList = new ArrayList<>();
+        ArrayList<Integer> labelsIntArrayList = new ArrayList<>();
+        
 
         try {
             File f = new File(filePath);
@@ -45,12 +48,28 @@ public class Main {
 
 
                 // ** wdbc data **
+                // String line = scan.nextLine();
+                // String[] splitLine = line.split(",", 3);
+                // String label = splitLine[1];
+                // labelsStrArrayList.add(label);
+                // double[] toDub;
+                // String values = splitLine[2];
+                // String[] splitValues = values.split(",");
+                // toDub = new double[splitValues.length];
+
+                // for (int i = 0; i < splitValues.length; i++) {
+                //     toDub[i] = Double.parseDouble(splitValues[i]);
+                // }
+
+                // dataArrayList.add(toDub);
+
+                // ** mnist **
                 String line = scan.nextLine();
-                String[] splitLine = line.split(",", 3);
-                String label = splitLine[1];
-                labelsArrayList.add(label);
+                String[] splitLine = line.split(",", 2);
+                int label = Integer.parseInt(splitLine[0]);
+                labelsIntArrayList.add(label);
                 double[] toDub;
-                String values = splitLine[2];
+                String values = splitLine[1];
                 String[] splitValues = values.split(",");
                 toDub = new double[splitValues.length];
 
@@ -59,8 +78,8 @@ public class Main {
                 }
 
                 dataArrayList.add(toDub);
-            }
 
+            }
             scan.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -68,7 +87,11 @@ public class Main {
 
 
         double[][] data_ = dataArrayList.toArray(new double[0][]);
-        String[] labels = labelsArrayList.toArray(new String[0]);
+        // String[] labelsS = labelsStrArrayList.toArray(new String[0]);
+        Integer[] labelsI = labelsIntArrayList.toArray(new Integer[0]);
+
+        // System.out.println(new SimpleMatrix(data_).getRow(0));
+        // System.out.println(labelsI[0]);
 
         // double[][] testerData = new double[75][];
         // String[] testerLabels = new String[75];
@@ -82,37 +105,45 @@ public class Main {
 
         // Data data = new Data(testerData, testerLabels);
 
-        Data data = new Data(data_, labels);
-        data.zScoreNormalization();
+        Data data = new Data(data_, labelsI);
+        data.minMaxNormalization();
+        // data.zScoreNormalization();
 
         data.split(0.20, 0.20);
 
         NeuralNet nn = new NeuralNet();
         Dense d1 = new Dense(
-            8,
+            128,
             new ReLU(),
-            30);
+            784);
         d1.addRegularizer(new L2(0.01));
-        d1.addNormalization(new BatchNormalization());
+        // d1.addNormalization(new BatchNormalization());
 
         Dense d2 = new Dense(
-            4,
+            64,
             new ReLU());
         d2.addRegularizer(new L2(0.01));
-        d2.addNormalization(new BatchNormalization());
+        // d2.addNormalization(new BatchNormalization());
 
-        Output d3 = new Output(
-            1,
-            new Sigmoid(),
-            new BinCrossEntropy());
+        Dense d3 = new Dense(
+            64,
+            new ReLU());
         d3.addRegularizer(new L2(0.01));
-        d3.addNormalization(new BatchNormalization());
+        // d3.addNormalization(new BatchNormalization());
+
+        Output d4 = new Output(
+            data.getClasses().size(),
+            new Softmax(),
+            new CatCrossEntropy());
+        d4.addRegularizer(new L2(0.01));
+        // d4.addNormalization(new BatchNormalization());
 
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-        nn.compile(new Adam(0.001), new BinaryMetrics());
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 8, 35);
+        nn.addLayer(d4);
+        nn.compile(new Adam(0.001), new MultiClassMetrics());
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 5);
         // nn.batchFit(data.getTrainData(), data.getTestData(), data.getValData(), 25);
 
         // MultiClassMetrics m = new MultiClassMetrics();

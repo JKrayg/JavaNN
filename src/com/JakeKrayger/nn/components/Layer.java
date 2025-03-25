@@ -189,7 +189,7 @@ public class Layer {
     }
 
     public void updateBiases(SimpleMatrix gradientWrtBiases, Optimizer o) {
-        this.weights = o.executeWeightsUpdate(this);
+        this.bias = o.executeBiasUpdate(this);
     }
     
 }

@@ -1,6 +1,7 @@
 package src.com.JakeKrayger.nn;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +42,32 @@ public class Data {
         double[] ls = new double[labels.length];
         for (int i = 0; i < labels.length; i++) {
             ls[i] = classes.get(labels[i]);
+        }
+
+        if (classes.size() > 2) {
+            this.labels = oneHot(new SimpleMatrix(ls));
+        } else {
+            this.labels = new SimpleMatrix(ls);
+        }
+
+        
+    }
+
+    public Data(double[][] data, Integer[] labels) {
+        this.data = new SimpleMatrix(data);
+
+        // create a hashtable of distinct labels mapped to an integer
+        HashMap<String, Integer> h = new HashMap<>();
+        for (int i: labels) {
+            h.put(Integer.toString(i), i);
+        }
+
+        this.classes = h;
+
+        // create list of a label values
+        double[] ls = new double[labels.length];
+        for (int i = 0; i < labels.length; i++) {
+            ls[i] = classes.get(Integer.toString(labels[i]));
         }
 
         if (classes.size() > 2) {
@@ -101,6 +128,13 @@ public class Data {
                 }
             }
 
+        }
+    }
+
+    public void minMaxNormalization() {
+        if (data != null) {
+            double max = data.elementMax();
+            data = data.divide(max);
         }
     }
 

@@ -78,6 +78,7 @@ public class Adam extends Optimizer {
     // }
 
     public SimpleMatrix executeBiasUpdate(Layer l) {
+        // System.out.println("called");
         SimpleMatrix gWrtB = l.getGradientBias();
         SimpleMatrix momentumOfBiases = l.getBiasMomentum()
                                         .scale(momentumDecay)
