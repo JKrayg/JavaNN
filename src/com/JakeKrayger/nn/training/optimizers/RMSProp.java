@@ -3,6 +3,7 @@ package src.com.JakeKrayger.nn.training.optimizers;
 import org.ejml.simple.SimpleMatrix;
 
 import src.com.JakeKrayger.nn.components.Layer;
+import src.com.JakeKrayger.nn.training.normalization.Normalization;
 
 public class RMSProp extends Optimizer {
     private double learningRate;
@@ -19,6 +20,14 @@ public class RMSProp extends Optimizer {
     public SimpleMatrix executeBiasUpdate(Layer l) {
         // **
         return l.getBias();
+    }
+
+    public SimpleMatrix executeShiftUpdate(Normalization n) {
+        return new SimpleMatrix(0, 0);
+    }
+
+    public SimpleMatrix executeScaleUpdate(Normalization n) {
+        return new SimpleMatrix(0, 0);
     }
 
     public double getLearningRate() {

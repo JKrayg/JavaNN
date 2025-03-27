@@ -1,8 +1,12 @@
 package src.com.JakeKrayger.nn.training.optimizers;
 
+import java.sql.BatchUpdateException;
+
 import org.ejml.simple.SimpleMatrix;
 
 import src.com.JakeKrayger.nn.components.Layer;
+import src.com.JakeKrayger.nn.training.normalization.BatchNormalization;
+import src.com.JakeKrayger.nn.training.normalization.Normalization;
 
 public class Adam extends Optimizer {
     private double learningRate;
@@ -52,33 +56,7 @@ public class Adam extends Optimizer {
         return updatedWeights;
     }
 
-    // public SimpleMatrix executeShiftUpdate(Layer l) {
-    //     SimpleMatrix gWrtS = l.getGradientShifts();
-    //     SimpleMatrix momentumOfShifts = l.getShiftsMomentum()
-    //                                      .scale(momentumDecay)
-    //                                      .plus(gWrtS.scale(1 - momentumDecay));
-
-    //     SimpleMatrix varianceOfShifts = l.getShiftsVariance()
-    //                                      .scale(varianceDecay)
-    //                                      .plus(gWrtS.elementPower(2).scale(1 - varianceDecay));
-
-    //     SimpleMatrix currShifts = l.getShifts();
-    //     SimpleMatrix biasCorrectedMomentum = momentumOfShifts.divide(1 - Math.pow(momentumDecay, updateCount));
-    //     SimpleMatrix biasCorrectedVariance = varianceOfShifts.divide(1 - Math.pow(varianceDecay, updateCount));
-    //     SimpleMatrix biasCorrection = biasCorrectedMomentum
-    //                                   .elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon))
-    //                                   .scale(learningRate);
-
-    //     SimpleMatrix updatedShifts = currShifts.minus(biasCorrection);
-
-        // l.setShiftMomentum(momentumOfWeights);
-        // l.getShiftVariance(varianceOfWeights);
-
-    //     return updatedShifts;
-    // }
-
     public SimpleMatrix executeBiasUpdate(Layer l) {
-        // System.out.println("called");
         SimpleMatrix gWrtB = l.getGradientBias();
         SimpleMatrix momentumOfBiases = l.getBiasMomentum()
                                         .scale(momentumDecay)
@@ -101,6 +79,56 @@ public class Adam extends Optimizer {
         l.setBiasesVariance(varianceOfBias);
 
         return updatedBiases;
+    }
+
+    public SimpleMatrix executeShiftUpdate(Normalization n) {
+        SimpleMatrix gWrtSh = n.getGradientShift();
+        SimpleMatrix momentumOfShifts = n.getShiftMomentum()
+                                         .scale(momentumDecay)
+                                         .plus(gWrtSh.scale(1 - momentumDecay));
+
+        SimpleMatrix varianceOfShifts = n.getShiftVariance()
+                                         .scale(varianceDecay)
+                                         .plus(gWrtSh.elementPower(2).scale(1 - varianceDecay));
+
+        SimpleMatrix currShifts = n.getShift();
+        SimpleMatrix biasCorrectedMomentum = momentumOfShifts.divide(1 - Math.pow(momentumDecay, updateCount));
+        SimpleMatrix biasCorrectedVariance = varianceOfShifts.divide(1 - Math.pow(varianceDecay, updateCount));
+        SimpleMatrix biasCorrection = biasCorrectedMomentum
+                                      .elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon))
+                                      .scale(learningRate);
+
+        SimpleMatrix updatedShifts = currShifts.minus(biasCorrection);
+
+        n.setShiftMomentum(momentumOfShifts);
+        n.setShiftVariance(varianceOfShifts);
+
+        return updatedShifts;
+    }
+
+    public SimpleMatrix executeScaleUpdate(Normalization n) {
+        SimpleMatrix gWrtSc = n.getGradientScale();
+        SimpleMatrix momentumOfScale = n.getScaleMomentum()
+                                         .scale(momentumDecay)
+                                         .plus(gWrtSc.scale(1 - momentumDecay));
+
+        SimpleMatrix varianceOfScale = n.getScaleVariance()
+                                         .scale(varianceDecay)
+                                         .plus(gWrtSc.elementPower(2).scale(1 - varianceDecay));
+
+        SimpleMatrix currScale = n.getScale();
+        SimpleMatrix biasCorrectedMomentum = momentumOfScale.divide(1 - Math.pow(momentumDecay, updateCount));
+        SimpleMatrix biasCorrectedVariance = varianceOfScale.divide(1 - Math.pow(varianceDecay, updateCount));
+        SimpleMatrix biasCorrection = biasCorrectedMomentum
+                                      .elementDiv(biasCorrectedVariance.elementPower(0.5).plus(epsilon))
+                                      .scale(learningRate);
+
+        SimpleMatrix updatedScale = currScale.minus(biasCorrection);
+
+        n.setScaleMomentum(momentumOfScale);
+        n.setScaleVariance(varianceOfScale);
+
+        return updatedScale;
     }
 
     public double getLearningRate() {

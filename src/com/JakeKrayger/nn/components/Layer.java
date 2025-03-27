@@ -8,6 +8,7 @@ import src.com.JakeKrayger.nn.activation.Sigmoid;
 import src.com.JakeKrayger.nn.layers.Output;
 import src.com.JakeKrayger.nn.training.loss.BinCrossEntropy;
 import src.com.JakeKrayger.nn.training.loss.Loss;
+import src.com.JakeKrayger.nn.training.normalization.BatchNormalization;
 import src.com.JakeKrayger.nn.training.normalization.Normalization;
 import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
 import src.com.JakeKrayger.nn.training.regularizers.Regularizer;
@@ -90,6 +91,14 @@ public class Layer {
     public void setGradientBiases(SimpleMatrix gWrtB) {
         this.gradientWrtBiases = gWrtB;
     }
+
+    // public void setGradientShift(SimpleMatrix gWrtSh) {
+    //     ((BatchNormalization) this.normalization).setScale(gWrtSh);
+    // }
+
+    // public void setGradientScale(SimpleMatrix gWrtSc) {
+    //     ((BatchNormalization) this.normalization).setScale(gWrtSc);
+    // }
 
     public void setLoss(Loss loss) {
         this.loss = loss;
@@ -184,12 +193,20 @@ public class Layer {
         return new SimpleMatrix(biasG);
     }
 
-    public void updateWeights(SimpleMatrix gradientWrtWeights, Optimizer o) {
+    public void updateWeights(Optimizer o) {
         this.weights = o.executeWeightsUpdate(this);
     }
 
-    public void updateBiases(SimpleMatrix gradientWrtBiases, Optimizer o) {
+    public void updateBiases(Optimizer o) {
         this.bias = o.executeBiasUpdate(this);
     }
+
+    // public void updateScale(SimpleMatrix gradientWrtWeights, Optimizer o) {
+    //     ((BatchNormalization) this.normalization).setScale(o.executeScaleUpdate(this));
+    // }
+
+    // public void updateShift(SimpleMatrix gradientWrtBiases, Optimizer o) {
+    //     ((BatchNormalization) this.normalization).setScale(o.executeShiftUpdate(this));
+    // }
     
 }

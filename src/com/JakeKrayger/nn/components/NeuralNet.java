@@ -10,6 +10,7 @@ import src.com.JakeKrayger.nn.initialize.*;
 import src.com.JakeKrayger.nn.layers.*;
 import src.com.JakeKrayger.nn.training.loss.*;
 import src.com.JakeKrayger.nn.training.metrics.Metrics;
+import src.com.JakeKrayger.nn.training.normalization.BatchNormalization;
 import src.com.JakeKrayger.nn.training.normalization.Normalization;
 import src.com.JakeKrayger.nn.training.optimizers.*;
 import src.com.JakeKrayger.nn.utils.MathUtils;
@@ -54,6 +55,14 @@ public class NeuralNet {
             }
         }
 
+        Normalization norm = l.getNormalization();
+        if (norm != null) {
+            SimpleMatrix scl = new SimpleMatrix(l.getNumNeurons(), 1);
+            scl.fill(1.0);
+            norm.setScale(scl);
+            norm.setShift(new SimpleMatrix(l.getNumNeurons(), 1));
+        }
+
         this.layers.add(l);
 
     }
@@ -74,6 +83,15 @@ public class NeuralNet {
                 lyr.setWeightsVariance(weightsO);
                 lyr.setBiasesMomentum(biasO);
                 lyr.setBiasesVariance(biasO);
+                Normalization norm = lyr.getNormalization();
+                if (norm != null) {
+                    SimpleMatrix shiftO = new SimpleMatrix(norm.getShift().getNumRows(), norm.getShift().getNumCols());
+                    SimpleMatrix scaleO = new SimpleMatrix(norm.getScale().getNumRows(), norm.getScale().getNumCols());
+                    norm.setShiftMomentum(shiftO);
+                    norm.setShiftVariance(shiftO);
+                    norm.setScaleMomentum(scaleO);
+                    norm.setScaleVariance(scaleO);
+                }
             }
         }
     }
@@ -238,6 +256,23 @@ public class NeuralNet {
     }
 
 
+    public void backprop(SimpleMatrix data, SimpleMatrix labels) {
+        Output outLayer = (Output) layers.get(layers.size() - 1);
+        SimpleMatrix gradientWrtOutput = outLayer.getLoss().gradient(outLayer, outLayer.getLabels());
+        getGradients(outLayer, gradientWrtOutput, data);
+
+        for (Layer l : layers) {
+            l.updateWeights(optimizer);
+            l.updateBiases(optimizer);
+            Normalization norm = l.getNormalization();
+            if (norm instanceof BatchNormalization) {
+                ((BatchNormalization) norm).updateShift(optimizer);
+                ((BatchNormalization) norm).updateScale(optimizer);
+            }
+        }
+    }
+
+
     public double loss(SimpleMatrix d) {
         SimpleMatrix data = d.extractMatrix(
                 0, d.getNumRows(), 0, d.getNumCols() - (numClasses > 2 ? numClasses : 1));
@@ -259,22 +294,11 @@ public class NeuralNet {
     }
 
 
-    public void backprop(SimpleMatrix data, SimpleMatrix labels) {
-        Output outLayer = (Output) layers.get(layers.size() - 1);
-        SimpleMatrix gradientWrtOutput = outLayer.getLoss().gradient(outLayer, outLayer.getLabels());
-        getGradients(outLayer, gradientWrtOutput, data);
-
-        for (Layer l : layers) {
-            l.updateWeights(l.getGradientWeights(), optimizer);
-            l.updateBiases(l.getGradientBias(), optimizer);
-        }
-    }
-
-
     public void getGradients(Layer currLayer, SimpleMatrix gradient, SimpleMatrix data) {
         Layer curr = currLayer;
         SimpleMatrix gradientWrtWeights;
         SimpleMatrix gradientWrtBias;
+        Normalization norm = curr.getNormalization();
 
         if (currLayer instanceof Output) {
             Output out = (Output) curr;
@@ -292,10 +316,16 @@ public class NeuralNet {
 
             gradientWrtWeights = currLayer.gradientWeights(prev, gradient);
             gradientWrtBias = currLayer.gradientBias(gradient);
+            
         }
 
         if (curr.getRegularizer() != null) {
             gradientWrtWeights = gradientWrtWeights.plus(curr.getRegularizer().regularize(currLayer.getWeights()));
+        }
+
+        if (norm instanceof BatchNormalization) {
+            ((BatchNormalization) norm).setGradientShift(((BatchNormalization) norm).gradientShift(gradient));
+            ((BatchNormalization) norm).setGradientScale(((BatchNormalization) norm).gradientScale(gradient));
         }
 
         curr.setGradientWeights(gradientWrtWeights);

@@ -117,37 +117,37 @@ public class Main {
             new ReLU(),
             784);
         d1.addRegularizer(new L2(0.01));
-        // d1.addNormalization(new BatchNormalization());
+        d1.addNormalization(new BatchNormalization());
 
         Dense d2 = new Dense(
             64,
             new ReLU());
         d2.addRegularizer(new L2(0.01));
-        // d2.addNormalization(new BatchNormalization());
+        d2.addNormalization(new BatchNormalization());
 
         Dense d3 = new Dense(
             64,
             new ReLU());
         d3.addRegularizer(new L2(0.01));
-        // d3.addNormalization(new BatchNormalization());
+        d3.addNormalization(new BatchNormalization());
 
         Output d4 = new Output(
             data.getClasses().size(),
             new Softmax(),
             new CatCrossEntropy());
         d4.addRegularizer(new L2(0.01));
-        // d4.addNormalization(new BatchNormalization());
+        d4.addNormalization(new BatchNormalization());
 
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.addLayer(d4);
-        nn.compile(new Adam(0.005), new MultiClassMetrics());
+        nn.compile(new Adam(0.001), new MultiClassMetrics());
 
-        BatchNormalization b = new BatchNormalization();
-        SimpleMatrix z = new SimpleMatrix(new  double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
-        b.normalize(z);
-        // nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 20);
+        // BatchNormalization b = new BatchNormalization();
+        // SimpleMatrix z = new SimpleMatrix(new  double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
+        // b.normalize(z);
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 2);
         // nn.batchFit(data.getTrainData(), data.getTestData(), data.getValData(), 100);
 
         // MultiClassMetrics m = new MultiClassMetrics();
