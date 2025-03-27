@@ -56,11 +56,15 @@ public class NeuralNet {
         }
 
         Normalization norm = l.getNormalization();
+        int numNeur = l.getNumNeurons();
         if (norm != null) {
-            SimpleMatrix scl = new SimpleMatrix(l.getNumNeurons(), 1);
-            scl.fill(1.0);
-            norm.setScale(scl);
-            norm.setShift(new SimpleMatrix(l.getNumNeurons(), 1));
+            SimpleMatrix scVar = new SimpleMatrix(numNeur, 1);
+            scVar.fill(1.0);
+            SimpleMatrix shMeans = new SimpleMatrix(numNeur, 1);
+            norm.setScale(scVar);
+            norm.setShift(shMeans);
+            norm.setMeans(shMeans);
+            norm.setVariances(scVar);
         }
 
         this.layers.add(l);
@@ -209,9 +213,24 @@ public class NeuralNet {
     public void forwardPass(SimpleMatrix data, SimpleMatrix labels) {
         Layer L1 = layers.get(0);
         SimpleMatrix zL1 = maths.weightedSum(data, L1);
-        SimpleMatrix act = L1.getActFunc().execute(zL1);
+        ActivationFunction actF = L1.getActFunc();
+        SimpleMatrix act = actF.execute(zL1);
+        Normalization nL1 = L1.getNormalization();
+        SimpleMatrix aL1;
         L1.setPreActivations(zL1);
-        L1.setActivations(act);
+        if (nL1 != null) {
+            if (nL1.isBeforeActivation()) {
+                zL1 = nL1.normalize(zL1);
+                aL1 = actF.execute(zL1);
+            } else {
+                aL1 = actF.execute(zL1);
+                aL1 = nL1.normalize(aL1);
+            }
+            
+        } else {
+            aL1 = actF.execute(zL1);
+        }
+        L1.setActivations(aL1);
 
         for (int q = 1; q < layers.size(); q++) {
             Layer curr = layers.get(q);
@@ -281,16 +300,8 @@ public class NeuralNet {
 
         forwardPass(data, labels);
         Output outLayer = (Output) layers.get(layers.size() - 1);
-        // double l2Penalty = 0;
-        // for (Layer l : layers) {
-        //     if (l.getRegularizer() != null) {
-        //         SimpleMatrix w = l.getWeights();
-        //         l2Penalty += 0.5 * 0.01 * w.elementMult(w).elementSum();
-        //     }  
-        // }
         
         return outLayer.getLoss().execute(outLayer.getActivations(), labels);
-        //  + (l2Penalty / outLayer.getActivations().getNumRows());
     }
 
 
@@ -324,9 +335,11 @@ public class NeuralNet {
         }
 
         if (norm instanceof BatchNormalization) {
-            ((BatchNormalization) norm).setGradientShift(((BatchNormalization) norm).gradientShift(gradient));
-            ((BatchNormalization) norm).setGradientScale(((BatchNormalization) norm).gradientScale(gradient));
+            BatchNormalization batchNorm = (BatchNormalization) norm;
+            batchNorm.setGradientShift(batchNorm.gradientShift(gradient));
+            batchNorm.setGradientScale(batchNorm.gradientScale(gradient));
         }
+
 
         curr.setGradientWeights(gradientWrtWeights);
         curr.setGradientBiases(gradientWrtBias);

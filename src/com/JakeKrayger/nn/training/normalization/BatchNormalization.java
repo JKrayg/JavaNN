@@ -7,8 +7,8 @@ import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
 public class BatchNormalization extends Normalization {
     private SimpleMatrix scale;
     private SimpleMatrix shift;
-    private SimpleMatrix means;
-    private SimpleMatrix variances;
+    private SimpleMatrix runningMeans;
+    private SimpleMatrix runningVariances;
     private SimpleMatrix shiftMomentum;
     private SimpleMatrix shiftVariance;
     private SimpleMatrix scaleMomentum;
@@ -31,11 +31,11 @@ public class BatchNormalization extends Normalization {
     }
 
     public void setMeans(SimpleMatrix means) {
-        this.means = means;
+        this.runningMeans = means;
     }
 
     public void setVariances(SimpleMatrix variances) {
-        this.variances = variances;
+        this.runningVariances = variances;
     }
 
     public void setMomentum(double momentum) {
@@ -67,7 +67,7 @@ public class BatchNormalization extends Normalization {
     }
 
     public void setGradientScale(SimpleMatrix gWrtSc) {
-        this.gradientWrtShift = gWrtSc;
+        this.gradientWrtScale = gWrtSc;
     }
 
     public void beforeActivation(boolean b) {
@@ -76,6 +76,10 @@ public class BatchNormalization extends Normalization {
 
     public boolean isBeforeActivation() {
         return beforeActivation;
+    }
+
+    public double getEpsilon() {
+        return epsilon;
     }
 
     public SimpleMatrix getScale() {
@@ -87,11 +91,11 @@ public class BatchNormalization extends Normalization {
     }
 
     public SimpleMatrix getMeans() {
-        return means;
+        return runningMeans;
     }
 
     public SimpleMatrix getVariances() {
-        return variances;
+        return runningVariances;
     }
 
     public double getMomentum() {
@@ -122,9 +126,13 @@ public class BatchNormalization extends Normalization {
         return gradientWrtScale;
     }
 
+    public SimpleMatrix getNormZ() {
+        return normalizedZ;
+    }
+
     public SimpleMatrix gradientShift(SimpleMatrix gradient) {
-        SimpleMatrix gWrtSh = new SimpleMatrix(gradient.getNumCols(), 1);
         int cols = gradient.getNumCols();
+        SimpleMatrix gWrtSh = new SimpleMatrix(cols, 1);
 
         for (int i = 0; i < cols; i++) {
             gWrtSh.set(i, 0, gradient.getColumn(i).elementSum());
@@ -148,7 +156,7 @@ public class BatchNormalization extends Normalization {
     }
 
     public void updateShift(Optimizer o) {
-        this.setScale(o.executeShiftUpdate(this));
+        this.setShift(o.executeShiftUpdate(this));
     }
 
     public SimpleMatrix normalize(SimpleMatrix z) {
@@ -157,11 +165,6 @@ public class BatchNormalization extends Normalization {
         SimpleMatrix means = new SimpleMatrix(cols, 1);
         SimpleMatrix variances = new SimpleMatrix(cols, 1);
         SimpleMatrix norm = new SimpleMatrix(rows, cols);
-        // if (scale == null && shift == null) {
-        //     scale = new SimpleMatrix(cols, 1);
-        //     scale.fill(1.0);
-        //     shift = new SimpleMatrix(cols, 1);
-        // }
         
         for (int i = 0; i < cols; i++) {
             SimpleMatrix currCol = z.getColumn(i);
@@ -175,6 +178,8 @@ public class BatchNormalization extends Normalization {
             norm.setColumn(i, set.scale(scale.get(i)).plus(shift.get(i)));
         }
 
+        this.runningMeans = runningMeans.scale(momentum).plus(means.scale((1 - momentum)));
+        this.runningVariances = runningVariances.scale(momentum).plus(variances.scale((1 - momentum)));
         this.normalizedZ = norm;
 
         return norm;

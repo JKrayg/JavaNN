@@ -83,6 +83,8 @@ public class Adam extends Optimizer {
 
     public SimpleMatrix executeShiftUpdate(Normalization n) {
         SimpleMatrix gWrtSh = n.getGradientShift();
+        // System.out.println("gradient shift: ");
+        // System.out.println(gWrtSh);
         SimpleMatrix momentumOfShifts = n.getShiftMomentum()
                                          .scale(momentumDecay)
                                          .plus(gWrtSh.scale(1 - momentumDecay));
@@ -108,6 +110,8 @@ public class Adam extends Optimizer {
 
     public SimpleMatrix executeScaleUpdate(Normalization n) {
         SimpleMatrix gWrtSc = n.getGradientScale();
+        // System.out.println("gradient scale: ");
+        // System.out.println(gWrtSc);
         SimpleMatrix momentumOfScale = n.getScaleMomentum()
                                          .scale(momentumDecay)
                                          .plus(gWrtSc.scale(1 - momentumDecay));

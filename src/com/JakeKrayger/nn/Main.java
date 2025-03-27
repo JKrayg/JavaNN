@@ -136,7 +136,6 @@ public class Main {
             new Softmax(),
             new CatCrossEntropy());
         d4.addRegularizer(new L2(0.01));
-        d4.addNormalization(new BatchNormalization());
 
         nn.addLayer(d1);
         nn.addLayer(d2);
@@ -148,6 +147,12 @@ public class Main {
         // SimpleMatrix z = new SimpleMatrix(new  double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
         // b.normalize(z);
         nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 2);
+
+        // System.out.println("d1 scale");
+        // System.out.println(d1.getNormalization().getScale());
+        // System.out.println("d1 shift:");
+        // System.out.println(d1.getNormalization().getShift());
+       
         // nn.batchFit(data.getTrainData(), data.getTestData(), data.getValData(), 100);
 
         // MultiClassMetrics m = new MultiClassMetrics();
@@ -160,6 +165,12 @@ public class Main {
         // SimpleMatrix testLabels = trainD.extractMatrix(
         //     0, 1, trainD.getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1), trainD.getNumCols());
         
+        // nn.forwardPass(testData, testLabels);
+
+        // for (Layer l : nn.getLayers()) {
+        //     System.out.println(l.getNormalization().getGradientScale());
+        //     System.out.println(l.getNormalization().getGradientShift());
+        // }
         // nn.forwardPass(testData, testLabels);
         // System.out.println(d4.getActivations());
         // System.out.println(testLabels);
