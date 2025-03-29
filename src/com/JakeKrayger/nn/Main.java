@@ -141,12 +141,12 @@ public class Main {
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.addLayer(d4);
-        nn.compile(new Adam(0.001), new MultiClassMetrics());
+        nn.compile(new Adam(0.01), new MultiClassMetrics());
 
         // BatchNormalization b = new BatchNormalization();
         // SimpleMatrix z = new SimpleMatrix(new  double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}});
         // b.normalize(z);
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 2);
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 7);
 
         // System.out.println("d1 scale");
         // System.out.println(d1.getNormalization().getScale());
@@ -189,6 +189,81 @@ public class Main {
         
         // System.out.println("d3 thresh:");
         // System.out.println(new SimpleMatrix(m.thresh(d3.getActivations())));
+
+
+    // SimpleMatrix preNormZ;
+    // SimpleMatrix means;
+    // SimpleMatrix variances;
+    // SimpleMatrix scale;
+    // SimpleMatrix shift;
+    // double epsilon;
+    // BatchNormalization b = new BatchNormalization();
+    // means = new SimpleMatrix(2, 1);
+    // means.set(0, 0, 2.0);
+    // means.set(1, 0, 4.0);
+    // b.setMeans(means);
+
+    // variances = new SimpleMatrix(2, 1);
+    // variances.set(0, 0, 0.6667);
+    // variances.set(1, 0, 2.6667);
+    // b.setVariances(variances);
+
+    // shift = new SimpleMatrix(2, 1);
+    // shift.set(0, 0, 1.0);
+    // shift.set(1, 0, 0.5);
+    // b.setShift(shift);
+
+    // scale = new SimpleMatrix(2, 1);
+    // scale.set(0, 0, 1.0);
+    // scale.set(1, 0, 0.5);
+    // b.setScale(scale);
+
+    // epsilon = 0.001;
+    // b.setEpsilon(epsilon);
+
+    // preNormZ = new SimpleMatrix(3, 2);
+    // preNormZ.setRow(0, 0, 1.0, 2.0);
+    // preNormZ.setRow(1, 0, 2.0, 4.0);
+    // preNormZ.setRow(2, 0, 3.0, 6.0);
+    // b.normalize(preNormZ);
+
+    // SimpleMatrix zHatGradient = new SimpleMatrix(3, 2);
+    // zHatGradient.setRow(0, 0, 0.1, 0.2);
+    // zHatGradient.setRow(1, 0, 0.3, 0.4);
+    // zHatGradient.setRow(2, 0, 0.5, 0.6);
+
+    // SimpleMatrix result = b.gradientPreBN(zHatGradient);
+    // System.out.println("zhat:");
+    // System.out.println(zHatGradient);
+    // System.out.println("∂L/∂z:");
+    // System.out.println(result);
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         
 
 

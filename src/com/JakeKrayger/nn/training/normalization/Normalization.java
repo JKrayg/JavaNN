@@ -6,7 +6,6 @@ import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
 
 public abstract class Normalization {
     public abstract boolean isBeforeActivation();
-    public abstract SimpleMatrix normalize(SimpleMatrix z);
     public abstract void setScale(SimpleMatrix scale);
     public abstract void setShift(SimpleMatrix shift);
     public abstract void setMeans(SimpleMatrix means);
@@ -15,6 +14,8 @@ public abstract class Normalization {
     public abstract void setShiftVariance(SimpleMatrix shV);
     public abstract void setScaleMomentum(SimpleMatrix scM);
     public abstract void setScaleVariance(SimpleMatrix scV);
+    public abstract void updateScale(Optimizer o);
+    public abstract void updateShift(Optimizer o);
     public abstract SimpleMatrix getShiftMomentum();
     public abstract SimpleMatrix getShiftVariance();
     public abstract SimpleMatrix getScaleMomentum();
@@ -26,7 +27,6 @@ public abstract class Normalization {
     public abstract SimpleMatrix gradientShift(SimpleMatrix gradient);
     public abstract SimpleMatrix gradientScale(SimpleMatrix gradient);
     public abstract SimpleMatrix getNormZ();
-    public abstract void updateScale(Optimizer o);
-    public abstract void updateShift(Optimizer o);
+    public abstract SimpleMatrix normalize(SimpleMatrix z);
     
 }

@@ -306,16 +306,33 @@ public class NeuralNet {
 
 
     public void getGradients(Layer currLayer, SimpleMatrix gradient, SimpleMatrix data) {
+        // if (batch normalization) {
+        //     use incoming gradient (∂L/∂zhat) to get gradient wrt shift/scale
+        //     convert ∂L/∂zhat back into ∂L/∂z and use to get gradient wrt weights/bias
+        // } else {
+        //     use incoming gradient (∂L/∂z) to get gradient wrt weights/bias
+        // }
+
+
         Layer curr = currLayer;
         SimpleMatrix gradientWrtWeights;
         SimpleMatrix gradientWrtBias;
         Normalization norm = curr.getNormalization();
+        SimpleMatrix grad;
+        if (norm instanceof BatchNormalization) {
+            BatchNormalization batchNorm = (BatchNormalization) norm;
+            grad = batchNorm.gradientPreBN(gradient);
+            batchNorm.setGradientShift(batchNorm.gradientShift(gradient));
+            batchNorm.setGradientScale(batchNorm.gradientScale(gradient));
+        } else {
+            grad = gradient.copy();
+        }
 
         if (currLayer instanceof Output) {
             Output out = (Output) curr;
             Layer prev = layers.get(layers.indexOf(curr) - 1);
-            gradientWrtWeights = out.gradientWeights(prev, gradient);
-            gradientWrtBias = out.gradientBias(curr, gradient);
+            gradientWrtWeights = out.gradientWeights(prev, grad);
+            gradientWrtBias = out.gradientBias(curr, grad);
         } else {
             Layer prev;
             if (layers.indexOf(curr) > 0) {
@@ -325,7 +342,7 @@ public class NeuralNet {
                 prev.setActivations(data);
             }
 
-            gradientWrtWeights = currLayer.gradientWeights(prev, gradient);
+            gradientWrtWeights = currLayer.gradientWeights(prev, grad);
             gradientWrtBias = currLayer.gradientBias(gradient);
             
         }
@@ -334,11 +351,11 @@ public class NeuralNet {
             gradientWrtWeights = gradientWrtWeights.plus(curr.getRegularizer().regularize(currLayer.getWeights()));
         }
 
-        if (norm instanceof BatchNormalization) {
-            BatchNormalization batchNorm = (BatchNormalization) norm;
-            batchNorm.setGradientShift(batchNorm.gradientShift(gradient));
-            batchNorm.setGradientScale(batchNorm.gradientScale(gradient));
-        }
+        // if (norm instanceof BatchNormalization) {
+        //     BatchNormalization batchNorm = (BatchNormalization) norm;
+        //     batchNorm.setGradientShift(batchNorm.gradientShift(gradient));
+        //     batchNorm.setGradientScale(batchNorm.gradientScale(gradient));
+        // }
 
 
         curr.setGradientWeights(gradientWrtWeights);
@@ -346,7 +363,7 @@ public class NeuralNet {
 
         if (layers.indexOf(curr) > 0) {
             Layer prev = layers.get(layers.indexOf(curr) - 1);
-            SimpleMatrix next = prev.getActFunc().gradient(prev, gradient.mult(currLayer.getWeights().transpose()));
+            SimpleMatrix next = prev.getActFunc().gradient(prev, grad.mult(currLayer.getWeights().transpose()));
             getGradients(prev, next, data);
         }
     }

@@ -7,6 +7,8 @@ import src.com.JakeKrayger.nn.training.optimizers.Optimizer;
 public class BatchNormalization extends Normalization {
     private SimpleMatrix scale;
     private SimpleMatrix shift;
+    private SimpleMatrix means;
+    private SimpleMatrix variances;
     private SimpleMatrix runningMeans;
     private SimpleMatrix runningVariances;
     private SimpleMatrix shiftMomentum;
@@ -18,9 +20,12 @@ public class BatchNormalization extends Normalization {
     private boolean beforeActivation = true;
     private SimpleMatrix gradientWrtShift;
     private SimpleMatrix gradientWrtScale;
+    private SimpleMatrix preNormZ;
+    private SimpleMatrix preScaleShiftZ;
     private SimpleMatrix normalizedZ;
 
-    public BatchNormalization() {}
+    public BatchNormalization() {
+    }
 
     public void setScale(SimpleMatrix scale) {
         this.scale = scale;
@@ -130,6 +135,14 @@ public class BatchNormalization extends Normalization {
         return normalizedZ;
     }
 
+    public SimpleMatrix getPreScaleShiftZ() {
+        return preScaleShiftZ;
+    }
+
+    public SimpleMatrix getPreNormZ() {
+        return preNormZ;
+    }
+
     public SimpleMatrix gradientShift(SimpleMatrix gradient) {
         int cols = gradient.getNumCols();
         SimpleMatrix gWrtSh = new SimpleMatrix(cols, 1);
@@ -146,7 +159,7 @@ public class BatchNormalization extends Normalization {
         int cols = gradient.getNumCols();
 
         for (int i = 0; i < cols; i++) {
-            gWrtSc.set(i, 0, gradient.getColumn(i).elementMult(normalizedZ.getColumn(i)).elementSum());
+            gWrtSc.set(i, 0, gradient.getColumn(i).elementMult(preScaleShiftZ.getColumn(i)).elementSum());
         }
         return gWrtSc;
     }
@@ -159,29 +172,100 @@ public class BatchNormalization extends Normalization {
         this.setShift(o.executeShiftUpdate(this));
     }
 
-    public SimpleMatrix normalize(SimpleMatrix z) {
+    public SimpleMatrix means(SimpleMatrix z) {
         int rows = z.getNumRows();
         int cols = z.getNumCols();
         SimpleMatrix means = new SimpleMatrix(cols, 1);
-        SimpleMatrix variances = new SimpleMatrix(cols, 1);
-        SimpleMatrix norm = new SimpleMatrix(rows, cols);
-        
+
         for (int i = 0; i < cols; i++) {
-            SimpleMatrix currCol = z.getColumn(i);
-            double currMean = currCol.elementSum() / rows;
-            means.set(i, 0, currMean);
-
-            double currVariance = currCol.minus(currMean).elementPower(2).elementSum() / rows;
-            variances.set(i, 0, currVariance);
-
-            SimpleMatrix set = currCol.minus(currMean).divide(Math.sqrt(currVariance + epsilon));
-            norm.setColumn(i, set.scale(scale.get(i)).plus(shift.get(i)));
+            means.set(i, z.getColumn(i).elementSum() / rows);
         }
 
+        return means;
+    }
+
+    public SimpleMatrix variances(SimpleMatrix z) {
+        int rows = z.getNumRows();
+        int cols = z.getNumCols();
+        SimpleMatrix variances = new SimpleMatrix(cols, 1);
+        SimpleMatrix means = means(z);
+
+        for (int i = 0; i < cols; i++) {
+            variances.set(i, z.getColumn(i).minus(means.get(i)).elementPower(2).elementSum() / rows);
+        }
+
+        return variances;
+    }
+
+    public SimpleMatrix normalize(SimpleMatrix z) {
+        int rows = z.getNumRows();
+        int cols = z.getNumCols();
+        SimpleMatrix means = means(z);
+        SimpleMatrix variances = variances(z);
+        SimpleMatrix preSclShft = new SimpleMatrix(rows, cols);
+        SimpleMatrix norm = new SimpleMatrix(rows, cols);
+
+        for (int i = 0; i < cols; i++) {
+            SimpleMatrix currCol = z.getColumn(i);
+            SimpleMatrix normalizedCol = currCol.minus(means.get(i)).divide(Math.sqrt(variances.get(i) + epsilon));
+            preSclShft.setColumn(i, normalizedCol);
+            norm.setColumn(i, normalizedCol.scale(scale.get(i)).plus(shift.get(i)));
+        }
+
+        this.means = means;
+        this.variances = variances;
         this.runningMeans = runningMeans.scale(momentum).plus(means.scale((1 - momentum)));
         this.runningVariances = runningVariances.scale(momentum).plus(variances.scale((1 - momentum)));
-        this.normalizedZ = norm;
+        this.preNormZ = z.copy();
+        this.preScaleShiftZ = preSclShft;
 
         return norm;
+    }
+
+    public SimpleMatrix gradientPreBN(SimpleMatrix zHatGradient) {
+        // clean this
+        int rows = zHatGradient.getNumRows();
+        int cols = zHatGradient.getNumCols();
+
+        SimpleMatrix zedHat = zHatGradient.copy();
+        SimpleMatrix zed = preNormZ.copy();
+        SimpleMatrix preBNGradient = new SimpleMatrix(rows, cols);
+        SimpleMatrix adjustmentTerm = null;
+        SimpleMatrix scalingFactor = scale.elementDiv(variances.plus(epsilon).elementPower(0.5));
+
+        SimpleMatrix broadcastMeans = new SimpleMatrix(rows, cols);
+        SimpleMatrix broadcastVars = new SimpleMatrix(rows, cols);
+        SimpleMatrix broadcastBatchMean = new SimpleMatrix(rows, cols);
+        SimpleMatrix broadcastScalingFactor = new SimpleMatrix(rows, cols);
+
+        SimpleMatrix incomingBatchMean = new SimpleMatrix(cols, 1);
+        for (int i = 0; i < cols; i++) {
+            incomingBatchMean.set(i, -(zedHat.getColumn(i).elementSum() / rows));
+        }
+
+        for (int help = 0; help < rows; help++) {
+            broadcastMeans.setRow(help, means.transpose());
+            broadcastVars.setRow(help, variances.transpose());
+            broadcastBatchMean.setRow(help, incomingBatchMean.transpose());
+            broadcastScalingFactor.setRow(help, scalingFactor.transpose());
+        }
+
+        SimpleMatrix firstPart = new SimpleMatrix(rows, cols);
+        SimpleMatrix dotProdTerm = new SimpleMatrix(cols, 1);
+        for (int j = 0; j < cols; j++) {
+            firstPart.setRow(j, preNormZ.getRow(j).minus(means.transpose()).elementDiv(variances.plus(epsilon).transpose()).scale(-1));
+            dotProdTerm.set(j, zHatGradient.getColumn(j).dot(zed.getColumn(j).minus(means.get(j))));
+        }
+
+        SimpleMatrix broadcast = new SimpleMatrix(firstPart.getNumRows(), firstPart.getNumCols());
+
+        for (int k = 0; k < firstPart.getNumCols(); k++) {
+            broadcast.setColumn(k, firstPart.getColumn(k).scale(dotProdTerm.get(k)));
+        }
+
+        adjustmentTerm = zedHat.plus(broadcastBatchMean).minus(broadcast);
+        preBNGradient = broadcastScalingFactor.elementMult(adjustmentTerm);
+
+        return preBNGradient;
     }
 }
