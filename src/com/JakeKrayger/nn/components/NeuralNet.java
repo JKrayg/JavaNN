@@ -217,12 +217,13 @@ public class NeuralNet {
         SimpleMatrix act = actF.execute(zL1);
         Normalization nL1 = L1.getNormalization();
         SimpleMatrix aL1;
-        L1.setPreActivations(zL1);
         if (nL1 != null) {
             if (nL1.isBeforeActivation()) {
                 zL1 = nL1.normalize(zL1);
+                L1.setPreActivations(zL1);
                 aL1 = actF.execute(zL1);
             } else {
+                L1.setPreActivations(zL1);
                 aL1 = actF.execute(zL1);
                 aL1 = nL1.normalize(aL1);
             }
@@ -236,7 +237,6 @@ public class NeuralNet {
             Layer curr = layers.get(q);
             Layer prev = layers.get(q - 1);
             SimpleMatrix z = maths.weightedSum(prev, curr);
-            curr.setPreActivations(z);
             Normalization norm = curr.getNormalization();
             ActivationFunction actFunc = curr.getActFunc();
             SimpleMatrix activated;
@@ -245,8 +245,10 @@ public class NeuralNet {
             if (norm != null) {
                 if (norm.isBeforeActivation()) {
                     z = norm.normalize(z);
+                    curr.setPreActivations(z);
                     activated = actFunc.execute(z);
                 } else {
+                    curr.setPreActivations(z);
                     activated = actFunc.execute(z);
                     activated = norm.normalize(activated);
                 }
@@ -343,7 +345,7 @@ public class NeuralNet {
             }
 
             gradientWrtWeights = currLayer.gradientWeights(prev, grad);
-            gradientWrtBias = currLayer.gradientBias(gradient);
+            gradientWrtBias = currLayer.gradientBias(grad);
             
         }
 

@@ -16,7 +16,7 @@ public class BatchNormalization extends Normalization {
     private SimpleMatrix scaleMomentum;
     private SimpleMatrix scaleVariance;
     private double momentum = 0.99;
-    private double epsilon = 1e-3;
+    private double epsilon = 0.9;
     private boolean beforeActivation = true;
     private SimpleMatrix gradientWrtShift;
     private SimpleMatrix gradientWrtScale;
@@ -36,10 +36,19 @@ public class BatchNormalization extends Normalization {
     }
 
     public void setMeans(SimpleMatrix means) {
+        this.means = means;
+    }
+
+    public void setRunningMeans(SimpleMatrix means) {
         this.runningMeans = means;
     }
 
     public void setVariances(SimpleMatrix variances) {
+        this.variances = variances;
+    }
+    
+
+    public void setRunningVariances(SimpleMatrix variances) {
         this.runningVariances = variances;
     }
 
@@ -214,58 +223,61 @@ public class BatchNormalization extends Normalization {
 
         this.means = means;
         this.variances = variances;
-        this.runningMeans = runningMeans.scale(momentum).plus(means.scale((1 - momentum)));
-        this.runningVariances = runningVariances.scale(momentum).plus(variances.scale((1 - momentum)));
+        // this.runningMeans = runningMeans.scale(momentum).plus(means.scale((1 - momentum)));
+        // this.runningVariances = runningVariances.scale(momentum).plus(variances.scale((1 - momentum)));
         this.preNormZ = z.copy();
         this.preScaleShiftZ = preSclShft;
 
         return norm;
     }
 
-    public SimpleMatrix gradientPreBN(SimpleMatrix zHatGradient) {
+    public void setPreNormZ(SimpleMatrix z) {
+        this.preNormZ = z;
+    }
+
+    public SimpleMatrix gradientPreBN(SimpleMatrix dLdzHat) {
         // clean this
-        int rows = zHatGradient.getNumRows();
-        int cols = zHatGradient.getNumCols();
+        int rows = dLdzHat.getNumRows();
+        int cols = dLdzHat.getNumCols();
 
-        SimpleMatrix zedHat = zHatGradient.copy();
-        SimpleMatrix zed = preNormZ.copy();
-        SimpleMatrix preBNGradient = new SimpleMatrix(rows, cols);
-        SimpleMatrix adjustmentTerm = null;
+        SimpleMatrix incoming = dLdzHat.copy();
+        SimpleMatrix preNormZed = this.preNormZ.copy();
         SimpleMatrix scalingFactor = scale.elementDiv(variances.plus(epsilon).elementPower(0.5));
+        SimpleMatrix part2 = new SimpleMatrix(cols, 1);
+        // SimpleMatrix part3
+        SimpleMatrix part4BeforeSum = new SimpleMatrix(rows, cols);
+        SimpleMatrix part4BeforeSumTranspose = null;
+        SimpleMatrix part4Final = new SimpleMatrix(cols, 1);
+        SimpleMatrix converted = new SimpleMatrix(rows, cols);
+        SimpleMatrix variancesPlusEpsilon = variances.plus(epsilon);
 
-        SimpleMatrix broadcastMeans = new SimpleMatrix(rows, cols);
-        SimpleMatrix broadcastVars = new SimpleMatrix(rows, cols);
-        SimpleMatrix broadcastBatchMean = new SimpleMatrix(rows, cols);
-        SimpleMatrix broadcastScalingFactor = new SimpleMatrix(rows, cols);
-
-        SimpleMatrix incomingBatchMean = new SimpleMatrix(cols, 1);
-        for (int i = 0; i < cols; i++) {
-            incomingBatchMean.set(i, -(zedHat.getColumn(i).elementSum() / rows));
+        for (int i = 0; i < rows; i++) {
+            part4BeforeSum.setRow(i, incoming.getRow(i).elementMult(preNormZed.getRow(i).minus(means.transpose())));
+            // System.out.println(incoming.getRow(i).elementMult(preNormZed.getRow(i).minus(means.transpose())).elementSum());
         }
 
-        for (int help = 0; help < rows; help++) {
-            broadcastMeans.setRow(help, means.transpose());
-            broadcastVars.setRow(help, variances.transpose());
-            broadcastBatchMean.setRow(help, incomingBatchMean.transpose());
-            broadcastScalingFactor.setRow(help, scalingFactor.transpose());
-        }
-
-        SimpleMatrix firstPart = new SimpleMatrix(rows, cols);
-        SimpleMatrix dotProdTerm = new SimpleMatrix(cols, 1);
         for (int j = 0; j < cols; j++) {
-            firstPart.setRow(j, preNormZ.getRow(j).minus(means.transpose()).elementDiv(variances.plus(epsilon).transpose()).scale(-1));
-            dotProdTerm.set(j, zHatGradient.getColumn(j).dot(zed.getColumn(j).minus(means.get(j))));
+            part2.set(j, incoming.getColumn(j).elementSum() / rows);
+            part4Final.set(j, part4BeforeSum.transpose().getRow(j).elementSum());
         }
 
-        SimpleMatrix broadcast = new SimpleMatrix(firstPart.getNumRows(), firstPart.getNumCols());
+        // System.out.println(part4Final);
+        // System.out.println(part2);
 
-        for (int k = 0; k < firstPart.getNumCols(); k++) {
-            broadcast.setColumn(k, firstPart.getColumn(k).scale(dotProdTerm.get(k)));
+        for (int k = 0; k < rows; k++) {
+            // System.out.println(preNormZed.getRow(k).minus(means.transpose()).elementDiv(variancesPlusEpsilon.transpose()));
+            SimpleMatrix part3 = preNormZed.getRow(k).minus(means.transpose()).elementDiv(variancesPlusEpsilon.transpose()).elementMult(part4Final.transpose());
+            // System.out.println(part3);
+            // System.out.println(incoming.getRow(k).minus(part2.transpose()));
+            // System.out.println(scalingFactor.transpose().elementMult(incoming.getRow(k).minus(part2.transpose())));
+            converted.setRow(k, scalingFactor.transpose().elementMult(incoming.getRow(k).minus(part2.transpose()).minus(part3)));
         }
 
-        adjustmentTerm = zedHat.plus(broadcastBatchMean).minus(broadcast);
-        preBNGradient = broadcastScalingFactor.elementMult(adjustmentTerm);
+        // System.out.println(converted);
 
-        return preBNGradient;
+
+
+
+        return converted;
     }
 }

@@ -22,11 +22,11 @@ public class SGD extends Optimizer {
     }
 
     public SimpleMatrix executeShiftUpdate(Normalization n) {
-        return new SimpleMatrix(0, 0);
+        return n.getShift().minus(n.getGradientShift().scale(learningRate));
     }
 
     public SimpleMatrix executeScaleUpdate(Normalization n) {
-        return new SimpleMatrix(0, 0);
+        return n.getScale().minus(n.getGradientScale().scale(learningRate));
     }
 
     public double getLearningRate() {
