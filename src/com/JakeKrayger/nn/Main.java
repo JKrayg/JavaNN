@@ -131,32 +131,43 @@ public class Main {
         d3.addRegularizer(new L2(0.01));
         d3.addNormalization(new BatchNormalization());
 
-        Output d4 = new Output(
+        Dense d4 = new Dense(
+            32,
+            new ReLU());
+        d4.addRegularizer(new L2(0.01));
+        d4.addNormalization(new BatchNormalization());
+
+        Output d5 = new Output(
             data.getClasses().size(),
             new Softmax(),
             new CatCrossEntropy());
-        d4.addRegularizer(new L2(0.01));
+        d5.addRegularizer(new L2(0.01));
 
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.addLayer(d4);
+        nn.addLayer(d5);
         nn.compile(new Adam(0.001), new MultiClassMetrics());
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 10);
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 20);
 
         // BatchNormalization b = new BatchNormalization();
         // b.setScale(new SimpleMatrix(new double[]{1, 1, 1}));
+        // b.setShift(new SimpleMatrix(new double[]{12, 12, 12}));
         // b.setMeans(new SimpleMatrix(new double[]{2, 2, 2}));
         // b.setVariances(new SimpleMatrix(new double[]{3, 3, 3}));
         // b.setPreNormZ(new SimpleMatrix(new double[][]{{13, 14, 15}, {16, 17, 18}, {19, 20, 21}, {22, 23, 24}}));
         // SimpleMatrix dLdzHat = new SimpleMatrix(new double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}});
-        // System.out.println(b.getScale());
-        // System.out.println(b.getMeans());
-        // System.out.println(b.getVariances());
-        // System.out.println(b.getPreNormZ());
-        // System.out.println(dLdzHat);
+        // // System.out.println(b.means(dLdzHat));
+        // // b.setMeans(b.means(dLdzHat));
+        // // System.out.println(b.variances(dLdzHat));
+        // // System.out.println(b.getScale());
+        // // System.out.println(b.getMeans());
+        // // System.out.println(b.getVariances());
+        // // System.out.println(b.getPreNormZ());
+        // // System.out.println(dLdzHat);
 
-        // b.gradientPreBN(dLdzHat);
+        // System.out.println(b.gradientPreBN(dLdzHat));
 
     }
 }

@@ -16,7 +16,7 @@ public class BatchNormalization extends Normalization {
     private SimpleMatrix scaleMomentum;
     private SimpleMatrix scaleVariance;
     private double momentum = 0.99;
-    private double epsilon = 0.9;
+    private double epsilon = 1e-3;
     private boolean beforeActivation = true;
     private SimpleMatrix gradientWrtShift;
     private SimpleMatrix gradientWrtScale;
@@ -244,16 +244,13 @@ public class BatchNormalization extends Normalization {
         SimpleMatrix preNormZed = this.preNormZ.copy();
         SimpleMatrix scalingFactor = scale.elementDiv(variances.plus(epsilon).elementPower(0.5));
         SimpleMatrix part2 = new SimpleMatrix(cols, 1);
-        // SimpleMatrix part3
         SimpleMatrix part4BeforeSum = new SimpleMatrix(rows, cols);
-        SimpleMatrix part4BeforeSumTranspose = null;
         SimpleMatrix part4Final = new SimpleMatrix(cols, 1);
         SimpleMatrix converted = new SimpleMatrix(rows, cols);
         SimpleMatrix variancesPlusEpsilon = variances.plus(epsilon);
 
         for (int i = 0; i < rows; i++) {
             part4BeforeSum.setRow(i, incoming.getRow(i).elementMult(preNormZed.getRow(i).minus(means.transpose())));
-            // System.out.println(incoming.getRow(i).elementMult(preNormZed.getRow(i).minus(means.transpose())).elementSum());
         }
 
         for (int j = 0; j < cols; j++) {
@@ -261,22 +258,10 @@ public class BatchNormalization extends Normalization {
             part4Final.set(j, part4BeforeSum.transpose().getRow(j).elementSum());
         }
 
-        // System.out.println(part4Final);
-        // System.out.println(part2);
-
         for (int k = 0; k < rows; k++) {
-            // System.out.println(preNormZed.getRow(k).minus(means.transpose()).elementDiv(variancesPlusEpsilon.transpose()));
             SimpleMatrix part3 = preNormZed.getRow(k).minus(means.transpose()).elementDiv(variancesPlusEpsilon.transpose()).elementMult(part4Final.transpose());
-            // System.out.println(part3);
-            // System.out.println(incoming.getRow(k).minus(part2.transpose()));
-            // System.out.println(scalingFactor.transpose().elementMult(incoming.getRow(k).minus(part2.transpose())));
             converted.setRow(k, scalingFactor.transpose().elementMult(incoming.getRow(k).minus(part2.transpose()).minus(part3)));
         }
-
-        // System.out.println(converted);
-
-
-
 
         return converted;
     }

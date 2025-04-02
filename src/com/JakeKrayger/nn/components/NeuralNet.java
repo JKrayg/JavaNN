@@ -213,44 +213,42 @@ public class NeuralNet {
     public void forwardPass(SimpleMatrix data, SimpleMatrix labels) {
         Layer L1 = layers.get(0);
         SimpleMatrix zL1 = maths.weightedSum(data, L1);
+        L1.setPreActivations(zL1);
         ActivationFunction actF = L1.getActFunc();
         SimpleMatrix act = actF.execute(zL1);
         Normalization nL1 = L1.getNormalization();
         SimpleMatrix aL1;
-        if (nL1 != null) {
+        if (nL1 instanceof BatchNormalization) {
             if (nL1.isBeforeActivation()) {
                 zL1 = nL1.normalize(zL1);
-                L1.setPreActivations(zL1);
                 aL1 = actF.execute(zL1);
             } else {
-                L1.setPreActivations(zL1);
                 aL1 = actF.execute(zL1);
-                aL1 = nL1.normalize(aL1);
+                zL1 = nL1.normalize(aL1);  
             }
-            
         } else {
             aL1 = actF.execute(zL1);
         }
+
         L1.setActivations(aL1);
 
         for (int q = 1; q < layers.size(); q++) {
             Layer curr = layers.get(q);
             Layer prev = layers.get(q - 1);
             SimpleMatrix z = maths.weightedSum(prev, curr);
+            curr.setPreActivations(z);
             Normalization norm = curr.getNormalization();
             ActivationFunction actFunc = curr.getActFunc();
             SimpleMatrix activated;
 
             // normalization
-            if (norm != null) {
+            if (norm instanceof BatchNormalization) {
                 if (norm.isBeforeActivation()) {
                     z = norm.normalize(z);
-                    curr.setPreActivations(z);
                     activated = actFunc.execute(z);
                 } else {
-                    curr.setPreActivations(z);
-                    activated = actFunc.execute(z);
-                    activated = norm.normalize(activated);
+                    z = actFunc.execute(z);
+                    activated = norm.normalize(z);
                 }
                 
             } else {
@@ -308,14 +306,6 @@ public class NeuralNet {
 
 
     public void getGradients(Layer currLayer, SimpleMatrix gradient, SimpleMatrix data) {
-        // if (batch normalization) {
-        //     use incoming gradient (∂L/∂zhat) to get gradient wrt shift/scale
-        //     convert ∂L/∂zhat back into ∂L/∂z and use to get gradient wrt weights/bias
-        // } else {
-        //     use incoming gradient (∂L/∂z) to get gradient wrt weights/bias
-        // }
-
-
         Layer curr = currLayer;
         SimpleMatrix gradientWrtWeights;
         SimpleMatrix gradientWrtBias;
@@ -333,8 +323,8 @@ public class NeuralNet {
         if (currLayer instanceof Output) {
             Output out = (Output) curr;
             Layer prev = layers.get(layers.indexOf(curr) - 1);
-            gradientWrtWeights = out.gradientWeights(prev, grad);
-            gradientWrtBias = out.gradientBias(curr, grad);
+            gradientWrtWeights = out.gradientWeights(prev, gradient);
+            gradientWrtBias = out.gradientBias(curr, gradient);
         } else {
             Layer prev;
             if (layers.indexOf(curr) > 0) {
@@ -353,19 +343,13 @@ public class NeuralNet {
             gradientWrtWeights = gradientWrtWeights.plus(curr.getRegularizer().regularize(currLayer.getWeights()));
         }
 
-        // if (norm instanceof BatchNormalization) {
-        //     BatchNormalization batchNorm = (BatchNormalization) norm;
-        //     batchNorm.setGradientShift(batchNorm.gradientShift(gradient));
-        //     batchNorm.setGradientScale(batchNorm.gradientScale(gradient));
-        // }
-
 
         curr.setGradientWeights(gradientWrtWeights);
         curr.setGradientBiases(gradientWrtBias);
 
         if (layers.indexOf(curr) > 0) {
             Layer prev = layers.get(layers.indexOf(curr) - 1);
-            SimpleMatrix next = prev.getActFunc().gradient(prev, grad.mult(currLayer.getWeights().transpose()));
+            SimpleMatrix next = prev.getActFunc().gradient(prev, gradient.mult(currLayer.getWeights().transpose()));
             getGradients(prev, next, data);
         }
     }
