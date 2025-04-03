@@ -27,12 +27,14 @@ public class Output extends Layer {
         return labels;
     }
 
+    // check
     public SimpleMatrix gradientWeights(Layer prevLayer, SimpleMatrix gradientWrtOutput) {
-        return (prevLayer.getActivations().transpose()).mult(gradientWrtOutput).divide(labels.getNumElements());
+        return prevLayer.getActivations().transpose().mult(gradientWrtOutput).divide(labels.getNumElements());
     }
 
-    public SimpleMatrix gradientBias(Layer currLayer, SimpleMatrix gradientWrtOutput) {
-        double[] biasG = new double[currLayer.getNumNeurons()];
+    // check
+    public SimpleMatrix gradientBias(SimpleMatrix gradientWrtOutput) {
+        double[] biasG = new double[this.getNumNeurons()];
         for (int i = 0; i < gradientWrtOutput.getNumCols(); i++) {
             SimpleMatrix col = gradientWrtOutput.extractVector(false, i);
             biasG[i] = col.elementSum() / labels.getNumElements();

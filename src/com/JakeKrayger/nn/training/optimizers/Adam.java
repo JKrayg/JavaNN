@@ -33,6 +33,8 @@ public class Adam extends Optimizer {
     
     public SimpleMatrix executeWeightsUpdate(Layer l) {
         SimpleMatrix gWrtW = l.getGradientWeights();
+        // System.out.println("weights gradient:");
+        // System.out.println(gWrtW);
         SimpleMatrix momentumOfWeights = l.getWeightsMomentum()
                                          .scale(momentumDecay)
                                          .plus(gWrtW.scale(1 - momentumDecay));
@@ -58,6 +60,8 @@ public class Adam extends Optimizer {
 
     public SimpleMatrix executeBiasUpdate(Layer l) {
         SimpleMatrix gWrtB = l.getGradientBias();
+        // System.out.println("bias gradient:");
+        // System.out.println(gWrtB);
         SimpleMatrix momentumOfBiases = l.getBiasMomentum()
                                         .scale(momentumDecay)
                                         .plus(gWrtB.scale(1 - momentumDecay));
@@ -83,7 +87,7 @@ public class Adam extends Optimizer {
 
     public SimpleMatrix executeShiftUpdate(Normalization n) {
         SimpleMatrix gWrtSh = n.getGradientShift();
-        // System.out.println("gradient shift: ");
+        // System.out.println("shift gradient:");
         // System.out.println(gWrtSh);
         SimpleMatrix momentumOfShifts = n.getShiftMomentum()
                                          .scale(momentumDecay)
@@ -110,7 +114,7 @@ public class Adam extends Optimizer {
 
     public SimpleMatrix executeScaleUpdate(Normalization n) {
         SimpleMatrix gWrtSc = n.getGradientScale();
-        // System.out.println("gradient scale: ");
+        // System.out.println("scale gradient:");
         // System.out.println(gWrtSc);
         SimpleMatrix momentumOfScale = n.getScaleMomentum()
                                          .scale(momentumDecay)

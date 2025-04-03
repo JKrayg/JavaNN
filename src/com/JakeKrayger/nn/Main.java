@@ -113,43 +113,58 @@ public class Main {
 
         NeuralNet nn = new NeuralNet();
         Dense d1 = new Dense(
-            128,
+            256,
             new ReLU(),
             784);
         d1.addRegularizer(new L2(0.01));
         d1.addNormalization(new BatchNormalization());
 
         Dense d2 = new Dense(
-            64,
+            128,
             new ReLU());
         d2.addRegularizer(new L2(0.01));
         d2.addNormalization(new BatchNormalization());
 
         Dense d3 = new Dense(
-            64,
+            128,
             new ReLU());
         d3.addRegularizer(new L2(0.01));
         d3.addNormalization(new BatchNormalization());
 
-        Dense d4 = new Dense(
-            32,
-            new ReLU());
-        d4.addRegularizer(new L2(0.01));
-        d4.addNormalization(new BatchNormalization());
-
-        Output d5 = new Output(
+        Output d4 = new Output(
             data.getClasses().size(),
             new Softmax(),
             new CatCrossEntropy());
-        d5.addRegularizer(new L2(0.01));
+        d4.addRegularizer(new L2(0.01));
 
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.addLayer(d4);
-        nn.addLayer(d5);
         nn.compile(new Adam(0.001), new MultiClassMetrics());
+        // SimpleMatrix dataa = data.getTrainData().extractMatrix(
+        //         0, data.getTrainData().getNumRows(), 0, data.getTrainData().getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1));
+        // SimpleMatrix labelss = data.getTrainData().extractMatrix(
+        //         0, data.getTrainData().getNumRows(), data.getTrainData().getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1), data.getTrainData().getNumCols());
+        // nn.forwardPass(dataa, labelss);
+        // nn.backprop(dataa, labelss);
         nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 20);
+        // System.out.println("Initial output: " + d5.getActivations().extractVector(true, 0));
+        // for (Layer l : nn.getLayers()) {
+        //     System.out.println(l.getClass().getSimpleName());
+        //     if (l.getNormalization() instanceof BatchNormalization) {
+        //         BatchNormalization norm = (BatchNormalization) l.getNormalization();
+        //         System.out.println("scales:");
+        //         System.out.println(norm.getScale());
+        //         System.out.println("shifts:");
+        //         System.out.println(norm.getShift());
+        //         System.out.println("means:");
+        //         System.out.println(norm.getMeans());
+        //         System.out.println("variances:");
+        //         System.out.println(norm.getVariances());
+        //     }
+            
+        // }
 
         // BatchNormalization b = new BatchNormalization();
         // b.setScale(new SimpleMatrix(new double[]{1, 1, 1}));

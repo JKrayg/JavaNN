@@ -24,7 +24,7 @@ public class MultiClassMetrics extends Metrics{
         }
         dis += "\n";
         // dis += "Precision: " + precision(pred, trueVals) + "\n";
-        dis += "Recall: " + recall(pred, trueVals) + "\n";
+        // dis += "Recall: " + recall(pred, trueVals) + "\n";
         System.out.println(dis);
     }
 

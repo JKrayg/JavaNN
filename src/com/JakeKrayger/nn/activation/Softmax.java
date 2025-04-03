@@ -28,7 +28,8 @@ public class Softmax extends ActivationFunction {
     }
 
     public SimpleMatrix gradient(Layer curr, SimpleMatrix gradientWrtPreAct) {
-        return gradientWrtPreAct.elementMult(derivative(curr.getPreActivation()));
+        return gradientWrtPreAct;
+        // return gradientWrtPreAct.elementMult(derivative(curr.getPreActivation()));
     }
 
 }

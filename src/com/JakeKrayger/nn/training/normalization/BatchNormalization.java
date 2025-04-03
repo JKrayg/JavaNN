@@ -16,7 +16,7 @@ public class BatchNormalization extends Normalization {
     private SimpleMatrix scaleMomentum;
     private SimpleMatrix scaleVariance;
     private double momentum = 0.99;
-    private double epsilon = 1e-3;
+    private double epsilon = 1e-5;
     private boolean beforeActivation = true;
     private SimpleMatrix gradientWrtShift;
     private SimpleMatrix gradientWrtScale;
@@ -104,12 +104,20 @@ public class BatchNormalization extends Normalization {
         return shift;
     }
 
-    public SimpleMatrix getMeans() {
+    public SimpleMatrix getRunningMeans() {
         return runningMeans;
     }
 
-    public SimpleMatrix getVariances() {
+    public SimpleMatrix getRunningVariances() {
         return runningVariances;
+    }
+
+    public SimpleMatrix getMeans() {
+        return means;
+    }
+
+    public SimpleMatrix getVariances() {
+        return variances;
     }
 
     public double getMomentum() {
@@ -153,7 +161,9 @@ public class BatchNormalization extends Normalization {
     }
 
     public SimpleMatrix gradientShift(SimpleMatrix gradient) {
+        // System.out.println("dL/dzHat sum: " + gradient.elementSum());
         int cols = gradient.getNumCols();
+        int rows = gradient.getNumRows();
         SimpleMatrix gWrtSh = new SimpleMatrix(cols, 1);
 
         for (int i = 0; i < cols; i++) {
@@ -164,8 +174,10 @@ public class BatchNormalization extends Normalization {
     }
 
     public SimpleMatrix gradientScale(SimpleMatrix gradient) {
+        // System.out.println("sumsc: " + gradient.elementSum());
         SimpleMatrix gWrtSc = new SimpleMatrix(gradient.getNumCols(), 1);
         int cols = gradient.getNumCols();
+        int rows = gradient.getNumRows();
 
         for (int i = 0; i < cols; i++) {
             gWrtSc.set(i, 0, gradient.getColumn(i).elementMult(preScaleShiftZ.getColumn(i)).elementSum());
@@ -223,8 +235,8 @@ public class BatchNormalization extends Normalization {
 
         this.means = means;
         this.variances = variances;
-        // this.runningMeans = runningMeans.scale(momentum).plus(means.scale((1 - momentum)));
-        // this.runningVariances = runningVariances.scale(momentum).plus(variances.scale((1 - momentum)));
+        this.runningMeans = runningMeans.scale(momentum).plus(means.scale((1 - momentum)));
+        this.runningVariances = runningVariances.scale(momentum).plus(variances.scale((1 - momentum)));
         this.preNormZ = z.copy();
         this.preScaleShiftZ = preSclShft;
 
@@ -237,6 +249,7 @@ public class BatchNormalization extends Normalization {
 
     public SimpleMatrix gradientPreBN(SimpleMatrix dLdzHat) {
         // clean this
+        // System.out.println("dL/dzHat sum: " + dLdzHat.elementSum());
         int rows = dLdzHat.getNumRows();
         int cols = dLdzHat.getNumCols();
 
@@ -259,10 +272,29 @@ public class BatchNormalization extends Normalization {
         }
 
         for (int k = 0; k < rows; k++) {
-            SimpleMatrix part3 = preNormZed.getRow(k).minus(means.transpose()).elementDiv(variancesPlusEpsilon.transpose()).elementMult(part4Final.transpose());
+            SimpleMatrix part3 = preNormZed.getRow(k)
+                                .minus(means.transpose())
+                                .elementDiv(variancesPlusEpsilon.transpose())
+                                .elementMult(part4Final.transpose());
             converted.setRow(k, scalingFactor.transpose().elementMult(incoming.getRow(k).minus(part2.transpose()).minus(part3)));
         }
+        // System.out.println("dL/dz sum: " + converted.elementSum());
 
         return converted;
+    }
+
+
+    public SimpleMatrix gradientPreBNSimple(SimpleMatrix dLdzHat) {
+        int rows = dLdzHat.getNumRows();
+        int cols = dLdzHat.getNumCols();
+        SimpleMatrix conversion = new SimpleMatrix(rows, cols);
+        SimpleMatrix std = variances.plus(epsilon).elementPower(0.5);
+        SimpleMatrix another = scale.elementDiv(std);
+
+        for (int i = 0; i < rows; i++) {
+            conversion.setRow(i, dLdzHat.getRow(i).transpose().elementMult(another));
+        }
+
+        return conversion;
     }
 }

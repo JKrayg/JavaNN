@@ -200,13 +200,5 @@ public class Layer {
     public void updateBiases(Optimizer o) {
         this.bias = o.executeBiasUpdate(this);
     }
-
-    // public void updateScale(SimpleMatrix gradientWrtWeights, Optimizer o) {
-    //     ((BatchNormalization) this.normalization).setScale(o.executeScaleUpdate(this));
-    // }
-
-    // public void updateShift(SimpleMatrix gradientWrtBiases, Optimizer o) {
-    //     ((BatchNormalization) this.normalization).setScale(o.executeShiftUpdate(this));
-    // }
     
 }

@@ -14,7 +14,8 @@ public class CatCrossEntropy extends Loss {
         }
         return -(error.elementSum() / rows);
     }
-
+    
+    // check
     public SimpleMatrix gradient(Layer out, SimpleMatrix labels) {
         return out.getActivations().minus(labels);
     }
