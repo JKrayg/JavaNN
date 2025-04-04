@@ -272,7 +272,7 @@ public class NeuralNet {
         SimpleMatrix grad;
         if (norm instanceof BatchNormalization) {
             BatchNormalization batchNorm = (BatchNormalization) norm;
-            grad = batchNorm.gradientPreBNSimple(gradient);
+            grad = batchNorm.gradientPreBN(gradient);
             batchNorm.setGradientShift(batchNorm.gradientShift(gradient));
             batchNorm.setGradientScale(batchNorm.gradientScale(gradient));
         } else {

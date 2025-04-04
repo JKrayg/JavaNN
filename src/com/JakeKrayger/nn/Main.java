@@ -125,22 +125,15 @@ public class Main {
         d2.addRegularizer(new L2(0.01));
         d2.addNormalization(new BatchNormalization());
 
-        Dense d3 = new Dense(
-            128,
-            new ReLU());
-        d3.addRegularizer(new L2(0.01));
-        d3.addNormalization(new BatchNormalization());
-
-        Output d4 = new Output(
+        Output d3 = new Output(
             data.getClasses().size(),
             new Softmax(),
             new CatCrossEntropy());
-        d4.addRegularizer(new L2(0.01));
+        d3.addRegularizer(new L2(0.01));
 
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
-        nn.addLayer(d4);
         nn.compile(new Adam(0.001), new MultiClassMetrics());
         // SimpleMatrix dataa = data.getTrainData().extractMatrix(
         //         0, data.getTrainData().getNumRows(), 0, data.getTrainData().getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1));

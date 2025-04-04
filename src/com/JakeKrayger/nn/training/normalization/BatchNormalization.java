@@ -16,7 +16,7 @@ public class BatchNormalization extends Normalization {
     private SimpleMatrix scaleMomentum;
     private SimpleMatrix scaleVariance;
     private double momentum = 0.99;
-    private double epsilon = 1e-5;
+    private double epsilon = 1e-3;
     private boolean beforeActivation = true;
     private SimpleMatrix gradientWrtShift;
     private SimpleMatrix gradientWrtScale;
@@ -247,54 +247,40 @@ public class BatchNormalization extends Normalization {
         this.preNormZ = z;
     }
 
+
     public SimpleMatrix gradientPreBN(SimpleMatrix dLdzHat) {
-        // clean this
-        // System.out.println("dL/dzHat sum: " + dLdzHat.elementSum());
         int rows = dLdzHat.getNumRows();
         int cols = dLdzHat.getNumCols();
-
-        SimpleMatrix incoming = dLdzHat.copy();
-        SimpleMatrix preNormZed = this.preNormZ.copy();
-        SimpleMatrix scalingFactor = scale.elementDiv(variances.plus(epsilon).elementPower(0.5));
-        SimpleMatrix part2 = new SimpleMatrix(cols, 1);
-        SimpleMatrix part4BeforeSum = new SimpleMatrix(rows, cols);
-        SimpleMatrix part4Final = new SimpleMatrix(cols, 1);
-        SimpleMatrix converted = new SimpleMatrix(rows, cols);
-        SimpleMatrix variancesPlusEpsilon = variances.plus(epsilon);
+        SimpleMatrix dLdz = new SimpleMatrix(rows, cols);
+        SimpleMatrix std = variances.plus(epsilon).elementPower(0.5);
+        SimpleMatrix scalingFactor = scale.elementDiv(std);
 
         for (int i = 0; i < rows; i++) {
-            part4BeforeSum.setRow(i, incoming.getRow(i).elementMult(preNormZed.getRow(i).minus(means.transpose())));
+            for (int j = 0; j < cols; j++) {
+                double gradientElement = dLdzHat.get(i, j);
+                double normElement = preScaleShiftZ.get(i, j);
+                dLdz.set(i, j,
+                    scalingFactor.get(i) * (gradientElement - 
+                    ((gradientElement - normElement) / rows) * 
+                    ((gradientElement * normElement) / rows)));
+            }
+            
         }
 
-        for (int j = 0; j < cols; j++) {
-            part2.set(j, incoming.getColumn(j).elementSum() / rows);
-            part4Final.set(j, part4BeforeSum.transpose().getRow(j).elementSum());
-        }
-
-        for (int k = 0; k < rows; k++) {
-            SimpleMatrix part3 = preNormZed.getRow(k)
-                                .minus(means.transpose())
-                                .elementDiv(variancesPlusEpsilon.transpose())
-                                .elementMult(part4Final.transpose());
-            converted.setRow(k, scalingFactor.transpose().elementMult(incoming.getRow(k).minus(part2.transpose()).minus(part3)));
-        }
-        // System.out.println("dL/dz sum: " + converted.elementSum());
-
-        return converted;
+        return dLdz;
     }
-
 
     public SimpleMatrix gradientPreBNSimple(SimpleMatrix dLdzHat) {
         int rows = dLdzHat.getNumRows();
         int cols = dLdzHat.getNumCols();
-        SimpleMatrix conversion = new SimpleMatrix(rows, cols);
+        SimpleMatrix dLdz = new SimpleMatrix(rows, cols);
         SimpleMatrix std = variances.plus(epsilon).elementPower(0.5);
-        SimpleMatrix another = scale.elementDiv(std);
+        SimpleMatrix scalingFactor = scale.elementDiv(std);
 
         for (int i = 0; i < rows; i++) {
-            conversion.setRow(i, dLdzHat.getRow(i).transpose().elementMult(another));
+            dLdz.setRow(i, dLdzHat.getRow(i).transpose().elementMult(scalingFactor));
         }
 
-        return conversion;
+        return dLdz;
     }
 }
