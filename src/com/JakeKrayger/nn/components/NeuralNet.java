@@ -10,9 +10,9 @@ import src.com.JakeKrayger.nn.initialize.*;
 import src.com.JakeKrayger.nn.layers.*;
 import src.com.JakeKrayger.nn.training.loss.*;
 import src.com.JakeKrayger.nn.training.metrics.Metrics;
-import src.com.JakeKrayger.nn.training.normalization.BatchNormalization;
-import src.com.JakeKrayger.nn.training.normalization.Normalization;
+import src.com.JakeKrayger.nn.training.normalization.*;
 import src.com.JakeKrayger.nn.training.optimizers.*;
+import src.com.JakeKrayger.nn.training.regularizers.*;
 import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class NeuralNet {
@@ -53,6 +53,7 @@ public class NeuralNet {
             }
         }
 
+        // init for batch normalization
         int numNeur = l.getNumNeurons();
         if (l.getNormalization() instanceof BatchNormalization) {
             BatchNormalization norm = (BatchNormalization) l.getNormalization();
@@ -216,13 +217,26 @@ public class NeuralNet {
         ActivationFunction actF = L1.getActFunc();
         L1.setPreActivations(zL1);
 
+        // normalize before activation if batch normalization
         Normalization nL1 = L1.getNormalization();
         if (nL1 instanceof BatchNormalization) {
             zL1 = nL1.normalize(zL1);
         }
         
         SimpleMatrix aL1 = actF.execute(zL1);
+
+        // dropout
+        if (L1.getRegularizers() != null) {
+            for (Regularizer r : L1.getRegularizers()) {
+                if (r instanceof Dropout) {
+                    aL1 = r.regularize(aL1);
+                }
+                break;
+            }
+        }
+        
         L1.setActivations(aL1);
+        
 
         for (int q = 1; q < layers.size(); q++) {
             Layer curr = layers.get(q);
@@ -232,12 +246,23 @@ public class NeuralNet {
             ActivationFunction actFunc = curr.getActFunc();
             curr.setPreActivations(z);
             
-            // normalization
+            // normalize before activation if batch normalization
             if (norm instanceof BatchNormalization) {
                 z = norm.normalize(z);
             }
 
             SimpleMatrix activated = actFunc.execute(z); 
+
+            // dropout
+            if (curr.getRegularizers() != null) {
+                for (Regularizer r : curr.getRegularizers()) {
+                    if (r instanceof Dropout) {
+                        activated = r.regularize(activated);
+                    }
+                    break;
+                }
+            }
+            
             curr.setActivations(activated);
 
             if (curr instanceof Output) {
@@ -250,11 +275,16 @@ public class NeuralNet {
     public void backprop(SimpleMatrix data, SimpleMatrix labels) {
         Output outLayer = (Output) layers.get(layers.size() - 1);
         SimpleMatrix gradientWrtOutput = outLayer.getLoss().gradient(outLayer, outLayer.getLabels());
+
+        // recursively get gradients
         getGradients(outLayer, gradientWrtOutput, data);
 
+        // update weights/biases
         for (Layer l : layers) {
             l.updateWeights(optimizer);
             l.updateBiases(optimizer);
+
+            // update beta/gamma if batch normalzation
             Normalization norm = l.getNormalization();
             if (norm instanceof BatchNormalization) {
                 ((BatchNormalization) norm).updateShift(optimizer);
@@ -268,6 +298,8 @@ public class NeuralNet {
         Layer curr = currLayer;
         SimpleMatrix gradientWrtWeights;
         SimpleMatrix gradientWrtBias;
+
+        // batch normalization gradients
         Normalization norm = curr.getNormalization();
         SimpleMatrix grad;
         if (norm instanceof BatchNormalization) {
@@ -279,6 +311,7 @@ public class NeuralNet {
             grad = gradient.copy();
         }
 
+        // weights/bias gradients
         if (currLayer instanceof Output) {
             Output out = (Output) curr;
             Layer prev = layers.get(layers.indexOf(curr) - 1);
@@ -298,8 +331,14 @@ public class NeuralNet {
             
         }
 
-        if (curr.getRegularizer() != null) {
-            gradientWrtWeights = gradientWrtWeights.plus(curr.getRegularizer().regularize(currLayer.getWeights()));
+        // regularization (L1/L2)
+        if (curr.getRegularizers() != null) {
+            for (Regularizer r : curr.getRegularizers()) {
+                if (r instanceof L1 || r instanceof L2) {
+                    gradientWrtWeights = gradientWrtWeights.plus(r.regularize(currLayer.getWeights()));
+                }
+                break;
+            }
         }
 
 

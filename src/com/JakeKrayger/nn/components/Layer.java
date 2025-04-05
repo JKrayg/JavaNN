@@ -1,5 +1,6 @@
 package src.com.JakeKrayger.nn.components;
 
+import java.util.ArrayList;
 import java.util.function.BinaryOperator;
 
 import org.ejml.simple.SimpleMatrix;
@@ -27,7 +28,7 @@ public class Layer {
     private SimpleMatrix gradientWrtBiases;
     private ActivationFunction func;
     private Loss loss;
-    private Regularizer regularizer;
+    private ArrayList<Regularizer> regularizers;
     private Normalization normalization;
     private int inputSize;
 
@@ -45,7 +46,11 @@ public class Layer {
     }
 
     public void addRegularizer(Regularizer r) {
-        this.regularizer = r;
+        if (regularizers == null) {
+            regularizers = new ArrayList<>();
+        }
+        
+        regularizers.add(r);
     }
 
     public void addNormalization(Normalization n) {
@@ -144,8 +149,8 @@ public class Layer {
         return func;
     }
 
-    public Regularizer getRegularizer() {
-        return regularizer;
+    public ArrayList<Regularizer> getRegularizers() {
+        return regularizers;
     }
 
     public Normalization getNormalization() {

@@ -116,46 +116,37 @@ public class Main {
             256,
             new ReLU(),
             784);
-        d1.addRegularizer(new L2(0.01));
-        d1.addNormalization(new BatchNormalization());
+        d1.addRegularizer(new Dropout(0.2));
+        // d1.addRegularizer(new L2(0.01));
+        // d1.addNormalization(new BatchNormalization());
 
         Dense d2 = new Dense(
             128,
             new ReLU());
-        d2.addRegularizer(new L2(0.01));
-        d2.addNormalization(new BatchNormalization());
+        d2.addRegularizer(new Dropout(0.2));
+        // d2.addRegularizer(new L2(0.01));
+        // d2.addNormalization(new BatchNormalization());
 
         Output d3 = new Output(
             data.getClasses().size(),
             new Softmax(),
             new CatCrossEntropy());
-        d3.addRegularizer(new L2(0.01));
+        // d3.addRegularizer(new L2(0.01));
 
         nn.addLayer(d1);
         nn.addLayer(d2);
         nn.addLayer(d3);
         nn.compile(new Adam(0.001), new MultiClassMetrics());
+        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 10);
         // SimpleMatrix dataa = data.getTrainData().extractMatrix(
         //         0, data.getTrainData().getNumRows(), 0, data.getTrainData().getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1));
         // SimpleMatrix labelss = data.getTrainData().extractMatrix(
         //         0, data.getTrainData().getNumRows(), data.getTrainData().getNumCols() - (data.getClasses().size() > 2 ? data.getClasses().size() : 1), data.getTrainData().getNumCols());
         // nn.forwardPass(dataa, labelss);
-        // nn.backprop(dataa, labelss);
-        nn.miniBatchFit(data.getTrainData(), data.getTestData(), data.getValData(), 32, 20);
+        
         // System.out.println("Initial output: " + d5.getActivations().extractVector(true, 0));
         // for (Layer l : nn.getLayers()) {
-        //     System.out.println(l.getClass().getSimpleName());
-        //     if (l.getNormalization() instanceof BatchNormalization) {
-        //         BatchNormalization norm = (BatchNormalization) l.getNormalization();
-        //         System.out.println("scales:");
-        //         System.out.println(norm.getScale());
-        //         System.out.println("shifts:");
-        //         System.out.println(norm.getShift());
-        //         System.out.println("means:");
-        //         System.out.println(norm.getMeans());
-        //         System.out.println("variances:");
-        //         System.out.println(norm.getVariances());
-        //     }
+        //     System.out.println(l.getActivations());
             
         // }
 
@@ -166,6 +157,9 @@ public class Main {
         // b.setVariances(new SimpleMatrix(new double[]{3, 3, 3}));
         // b.setPreNormZ(new SimpleMatrix(new double[][]{{13, 14, 15}, {16, 17, 18}, {19, 20, 21}, {22, 23, 24}}));
         // SimpleMatrix dLdzHat = new SimpleMatrix(new double[][]{{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}});
+        // Dropout d = new Dropout(0.2);
+        // System.out.println(dLdzHat);
+        // System.out.println(d.regularize(dLdzHat));
         // // System.out.println(b.means(dLdzHat));
         // // b.setMeans(b.means(dLdzHat));
         // // System.out.println(b.variances(dLdzHat));
