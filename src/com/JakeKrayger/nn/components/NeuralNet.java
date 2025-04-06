@@ -13,6 +13,7 @@ import src.com.JakeKrayger.nn.training.metrics.Metrics;
 import src.com.JakeKrayger.nn.training.normalization.*;
 import src.com.JakeKrayger.nn.training.optimizers.*;
 import src.com.JakeKrayger.nn.training.regularizers.*;
+import src.com.JakeKrayger.nn.training.callbacks.*;
 import src.com.JakeKrayger.nn.utils.MathUtils;
 
 public class NeuralNet {
@@ -23,6 +24,8 @@ public class NeuralNet {
     private double valLoss;
     private int numClasses;
     private MathUtils maths = new MathUtils();
+    private double[] lossHistory;
+    private ArrayList<Callback> callbacks;
 
     public ArrayList<Layer> getLayers() {
         return layers;
@@ -97,6 +100,17 @@ public class NeuralNet {
                     norm.setScaleMomentum(scaleO);
                     norm.setScaleVariance(scaleO);
                 }
+            }
+        }
+
+        // callbacks [find a better way to do this]
+        if (callbacks != null) {
+            for (Callback c : callbacks) {
+                if (c instanceof EarlyStopping) {
+                    EarlyStopping es = (EarlyStopping) c;
+                    lossHistory = new double[es.getPatience()];
+                }
+                break;
             }
         }
     }
@@ -225,7 +239,7 @@ public class NeuralNet {
         
         SimpleMatrix aL1 = actF.execute(zL1);
 
-        // dropout
+        // dropout [find a better way to do this]
         if (L1.getRegularizers() != null) {
             for (Regularizer r : L1.getRegularizers()) {
                 if (r instanceof Dropout) {
@@ -253,7 +267,7 @@ public class NeuralNet {
 
             SimpleMatrix activated = actFunc.execute(z); 
 
-            // dropout
+            // dropout [find a better way to do this]
             if (curr.getRegularizers() != null) {
                 for (Regularizer r : curr.getRegularizers()) {
                     if (r instanceof Dropout) {
@@ -331,7 +345,7 @@ public class NeuralNet {
             
         }
 
-        // regularization (L1/L2)
+        // regularization (L1/L2) [find a better way to do this]
         if (curr.getRegularizers() != null) {
             for (Regularizer r : curr.getRegularizers()) {
                 if (r instanceof L1 || r instanceof L2) {
